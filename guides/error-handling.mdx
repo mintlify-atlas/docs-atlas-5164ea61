@@ -34,7 +34,7 @@ interface ErrorResponse {
 ```typescript
 import { handleRejection } from 'rybbit.ts';
 
-analytic.track({ type: 'pageview', pathname: '/home' })
+analytics.track({ type: 'pageview', pathname: '/home' })
     .catch(handleRejection((error) => {
         console.error(`[${error.status}] ${error.error}`);
     }));
@@ -160,7 +160,7 @@ analytics
 `handleRejection` also accepts an async callback:
 
 ```typescript
-analytic.track({ type: 'pageview', pathname: '/home' })
+analytics.track({ type: 'pageview', pathname: '/home' })
     .catch(
         handleRejection(async (error) => {
             await logErrorToDatabase(error);

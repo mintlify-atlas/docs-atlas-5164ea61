@@ -358,7 +358,7 @@ interface RestConfig {
 **Example:**
 
 ```typescript
-import { Rest } from 'rybbit';
+import Rest from 'rybbit.ts';
 
 const client = new Rest({
     domain: 'https://app.rybbit.io',
@@ -697,6 +697,20 @@ Numeric status code:
 
 </Accordion>
 
+<Accordion title="RouteMethods">
+
+A mapped type that mirrors every method on the [`Routes`](/api-reference/routes-class) class. The [`Rest`](/api-reference/rest-class) class implements this type to guarantee it exposes a corresponding method for every URL builder in `Routes`.
+
+```typescript
+type RouteMethods = {
+    [K in keyof Routes]: any;
+};
+```
+
+This type is exported for advanced use cases such as creating typed proxy wrappers around `Rest`.
+
+</Accordion>
+
 </AccordionGroup>
 
 ---
@@ -714,7 +728,7 @@ function toDateString(date: Date): DateString
 **Example:**
 
 ```typescript
-import { toDateString } from 'rybbit';
+import { toDateString } from 'rybbit.ts';
 
 const today = toDateString(new Date()); // e.g. "2024-01-31"
 ```
@@ -734,7 +748,7 @@ function handleRejection(
 **Example:**
 
 ```typescript
-import { Rest, handleRejection } from 'rybbit';
+import { Rest, handleRejection } from 'rybbit.ts';
 
 const client = new Rest({ domain: '...', siteId: 123, apiKey: '...' });
 
