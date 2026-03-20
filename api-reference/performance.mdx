@@ -1,0 +1,164 @@
+---
+title: Performance
+description: Methods for querying Core Web Vitals and performance metrics.
+---
+
+## `getPerformanceOverview`
+
+Returns aggregate Core Web Vitals metrics (LCP, FID, CLS, TTFB, INP, FCP) for the site.
+
+```typescript
+async getPerformanceOverview(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (e.g. `"2024-01-31"`).
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+### Example
+
+```typescript
+const overview = await client.getPerformanceOverview({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+});
+```
+
+---
+
+## `getPerformanceTimeSeries`
+
+Returns performance metrics over time, bucketed by a time interval.
+
+```typescript
+async getPerformanceTimeSeries(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    bucket?: Bucket;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="bucket" type="Bucket">
+  Time bucket size for grouping data points. See [Bucket](/api-reference/types#bucket).
+</ParamField>
+
+### Example
+
+```typescript
+const timeSeries = await client.getPerformanceTimeSeries({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    bucket: 'day',
+});
+```
+
+---
+
+## `getPerformanceByDimension`
+
+Returns performance metrics broken down by a specific dimension.
+
+```typescript
+async getPerformanceByDimension(
+    dimension: Dimension,
+    options?: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+        page?: number;
+        limit?: number;
+        sortBy?: SortBy;
+        sortOrder?: Order;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="dimension" type="Dimension" required>
+  The dimension to break performance data down by. One of: `'pathname'`, `'country'`, `'browser'`, `'operating_system'`, `'device_type'`.
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of results per page.
+</ParamField>
+
+<ParamField query="sortBy" type="SortBy">
+  Field to sort results by.
+</ParamField>
+
+<ParamField query="sortOrder" type="Order">
+  Sort direction. One of: `'asc'`, `'desc'`.
+</ParamField>
+
+### Example
+
+```typescript
+const byBrowser = await client.getPerformanceByDimension('browser', {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    sortBy: 'sessions',
+    sortOrder: 'desc',
+    limit: 10,
+});
+```

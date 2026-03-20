@@ -1,0 +1,177 @@
+---
+title: request function
+description: Standalone authenticated fetch helper and ErrorResponse interface for low-level API access.
+---
+
+The `request` function is the low-level HTTP primitive that powers every call made by the [`Rest`](/api-reference/rest-class) class. It is also exported from `rybbit.ts` so you can use it directly when you need full control over the request lifecycle — for example, when integrating with your own middleware, logging layer, or retry logic.
+
+## Import
+
+```typescript
+import { request } from 'rybbit.ts';
+```
+
+## When to use the standalone function
+
+Use the `Rest` class for typical usage. Use the standalone `request` function when you need to:
+
+- Supply a different API key per-call (e.g., multi-tenant applications).
+- Use a `URL` built by a `Routes` instance without creating a full `Rest` instance.
+- Wrap requests in your own retry or telemetry logic without subclassing `Rest`.
+- Call an endpoint not yet wrapped by `Rest`.
+
+<Tip>
+  `Rest.request()` delegates to this function internally, passing the configured `apiKey` automatically. If you are already using a `Rest` instance you do not need to call this function directly.
+</Tip>
+
+## Signature
+
+```typescript
+function request<T>(
+  apiKey: string,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  url: URL,
+  body?: any
+): Promise<T>
+```
+
+## Parameters
+
+<ParamField path="apiKey" type="string" required>
+  Your rybbit API key. Sent as `Authorization: Bearer <apiKey>` on every request.
+</ParamField>
+
+<ParamField path="method" type="'GET' | 'POST' | 'PUT' | 'DELETE'" required>
+  The HTTP method to use.
+</ParamField>
+
+<ParamField path="url" type="URL" required>
+  The fully-constructed request URL. Use the [`Routes`](/api-reference/routes-class) class to build typed URLs.
+</ParamField>
+
+<ParamField path="body" type="any">
+  Optional request body. Serialized to JSON and sent with `Content-Type: application/json`. Omit or pass `undefined` for requests without a body.
+</ParamField>
+
+## Return value
+
+<ResponseField name="Promise<T>" type="Promise<T>">
+  Resolves with the parsed JSON response cast to `T` when the server returns a `2xx` status code.
+  Rejects with an `ErrorResponse` object for all failure cases.
+</ResponseField>
+
+## ErrorResponse
+
+When the promise rejects, the rejection reason is always an `ErrorResponse` object:
+
+```typescript
+interface ErrorResponse {
+  status: number;
+  error: string;
+}
+```
+
+<ResponseField name="status" type="number">
+  A numeric code describing the failure:
+
+  | Value | Meaning |
+  |---|---|
+  | `-1` | The request failed to send (network error, DNS failure, etc.). |
+  | `-2` | The response could not be parsed as JSON. |
+  | `-3` | An unknown error occurred (no response object was returned). |
+  | `XXX` | The HTTP status code returned by the server (e.g., `401`, `404`, `500`). |
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  A human-readable description of the error. For server errors this is the stringified response body.
+</ResponseField>
+
+<Note>
+  The SDK exports a [`handleRejection`](/api-reference/types#handlerejection) utility that narrows the rejection reason to `ErrorResponse` for you, which is useful when working with `.catch()` callbacks.
+</Note>
+
+## Error handling
+
+Because `request` uses a manual `Promise` constructor internally, rejections are always `ErrorResponse` objects — not native `Error` instances. You should handle them accordingly:
+
+```typescript
+import { request } from 'rybbit.ts';
+import { Routes } from 'rybbit.ts';
+import type { ErrorResponse } from 'rybbit.ts';
+
+const routes = new Routes(new URL('https://app.rybbit.io'));
+
+try {
+  const data = await request(
+    'your-api-key',
+    'GET',
+    routes.getOverview(42, { startDate: '2024-01-01', endDate: '2024-01-07' })
+  );
+  console.log(data);
+} catch (err) {
+  const e = err as ErrorResponse;
+  if (e.status === -1) {
+    console.error('Network error:', e.error);
+  } else if (e.status === 401) {
+    console.error('Invalid API key');
+  } else {
+    console.error(`API error ${e.status}:`, e.error);
+  }
+}
+```
+
+## Example: custom fetch wrapper with retry
+
+The following example shows how to build a thin retry wrapper around `request` without modifying the `Rest` class:
+
+```typescript
+import { request, Routes } from 'rybbit.ts';
+import type { ErrorResponse } from 'rybbit.ts';
+
+const API_KEY = process.env.RYBBIT_API_KEY!;
+const routes = new Routes(new URL('https://app.rybbit.io'));
+
+async function requestWithRetry<T>(
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  url: URL,
+  body?: any,
+  retries = 3
+): Promise<T> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await request<T>(API_KEY, method, url, body);
+    } catch (err) {
+      const e = err as ErrorResponse;
+      // Retry on network errors or 5xx responses
+      const isRetryable = e.status === -1 || e.status >= 500;
+      if (!isRetryable || attempt === retries) throw e;
+      await new Promise((r) => setTimeout(r, 200 * attempt));
+    }
+  }
+  throw { status: -3, error: 'Unknown response.' } satisfies ErrorResponse;
+}
+
+// Usage
+const overview = await requestWithRetry(
+  'GET',
+  routes.getOverview(42, { startDate: '2024-01-01' })
+);
+```
+
+## Example: per-tenant API keys
+
+If your application manages multiple rybbit accounts, you can call `request` directly with different API keys without creating separate `Rest` instances:
+
+```typescript
+import { request, Routes } from 'rybbit.ts';
+
+const routes = new Routes(new URL('https://app.rybbit.io'));
+
+function getOverviewForTenant(tenantApiKey: string, siteId: number) {
+  return request(
+    tenantApiKey,
+    'GET',
+    routes.getOverview(siteId, { startDate: '2024-01-01' })
+  );
+}
+```

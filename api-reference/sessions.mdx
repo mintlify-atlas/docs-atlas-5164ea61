@@ -1,0 +1,148 @@
+---
+title: Sessions
+description: Methods for listing sessions, retrieving session details, and mapping session locations.
+---
+
+## `getSessions`
+
+Returns a paginated list of sessions.
+
+```typescript
+async getSessions(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    page?: number;
+    limit?: number;
+    userId?: string;
+    identifiedOnly?: boolean;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (e.g. `"2024-01-31"`).
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of results per page.
+</ParamField>
+
+<ParamField query="userId" type="string">
+  Filter sessions to a specific user ID.
+</ParamField>
+
+<ParamField query="identifiedOnly" type="boolean">
+  When `true`, returns only sessions belonging to identified users.
+</ParamField>
+
+### Example
+
+```typescript
+const sessions = await client.getSessions({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    identifiedOnly: true,
+    limit: 25,
+});
+```
+
+---
+
+## `getSession`
+
+Returns detailed information for a single session, including all events recorded during that session.
+
+```typescript
+async getSession(
+    sessionId: string,
+    options?: {
+        limit?: number;
+        offset?: number;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="sessionId" type="string" required>
+  Unique identifier of the session.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Maximum number of events to return.
+</ParamField>
+
+<ParamField query="offset" type="number">
+  Number of events to skip (for pagination through events within the session).
+</ParamField>
+
+### Example
+
+```typescript
+const session = await client.getSession('abc123', {
+    limit: 100,
+    offset: 0,
+});
+```
+
+---
+
+## `getSessionLocations`
+
+Returns aggregated session location data suitable for map visualization.
+
+```typescript
+async getSessionLocations(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+### Example
+
+```typescript
+const locations = await client.getSessionLocations({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    filters: [{ parameter: 'country', type: 'equals', value: ['US'] }],
+});
+```

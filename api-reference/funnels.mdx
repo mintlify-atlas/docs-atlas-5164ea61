@@ -1,0 +1,229 @@
+---
+title: Funnels
+description: Methods for creating, analyzing, and managing multi-step conversion funnels.
+---
+
+## `getFunnels`
+
+Returns all saved funnels for the site.
+
+```typescript
+async getFunnels(): Promise<any>
+```
+
+### Example
+
+```typescript
+const funnels = await client.getFunnels();
+```
+
+---
+
+## `analyzeFunnel`
+
+Analyzes funnel conversion data step-by-step. The funnel definition is passed in the request body; date range and filters are query parameters.
+
+```typescript
+async analyzeFunnel(
+    funnel: AnalyzeFunnelRequestBody,
+    options?: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField body="funnel" type="AnalyzeFunnelRequestBody" required>
+  Funnel definition containing the ordered steps.
+
+  <Expandable title="AnalyzeFunnelRequestBody fields">
+    <ParamField body="steps" type="Array<object>" required>
+      Ordered list of funnel steps.
+
+      <Expandable title="step fields">
+        <ParamField body="type" type="'page' | 'event'" required>
+          Whether this step matches a page view or a custom event.
+        </ParamField>
+
+        <ParamField body="value" type="string" required>
+          The path or event name to match.
+        </ParamField>
+
+        <ParamField body="name" type="string" required>
+          Display name for this step.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+### Example
+
+```typescript
+const result = await client.analyzeFunnel(
+    {
+        steps: [
+            { type: 'page', value: '/', name: 'Home' },
+            { type: 'page', value: '/pricing', name: 'Pricing' },
+            { type: 'event', value: 'signup_click', name: 'Clicked signup' },
+        ],
+    },
+    {
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+    }
+);
+```
+
+---
+
+## `getFunnelStepSessions`
+
+Returns sessions that reached or dropped off at a specific step in a funnel.
+
+```typescript
+async getFunnelStepSessions(
+    funnel: GetFunnelStepSessionsRequestBody,
+    stepNumber: number,
+    mode: Mode,
+    options?: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+        page?: number;
+        limit?: number;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField body="funnel" type="GetFunnelStepSessionsRequestBody" required>
+  Funnel definition. Same shape as `AnalyzeFunnelRequestBody` — an object with a `steps` array.
+</ParamField>
+
+<ParamField path="stepNumber" type="number" required>
+  The 1-based index of the funnel step to inspect.
+</ParamField>
+
+<ParamField path="mode" type="Mode" required>
+  Whether to return sessions that `'reached'` or `'dropped'` at this step. Also accepts `'day'` or `'week'` for time-based grouping.
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of results per page.
+</ParamField>
+
+### Example
+
+```typescript
+// Sessions that dropped off at step 2
+const dropped = await client.getFunnelStepSessions(
+    {
+        steps: [
+            { type: 'page', value: '/', name: 'Home' },
+            { type: 'page', value: '/pricing', name: 'Pricing' },
+            { type: 'event', value: 'signup_click', name: 'Clicked signup' },
+        ],
+    },
+    2,
+    'dropped',
+    { startDate: '2024-01-01', endDate: '2024-01-31', limit: 50 }
+);
+```
+
+---
+
+## `createFunnel`
+
+Saves a new funnel for the site.
+
+```typescript
+async createFunnel(funnel: CreateFunnelRequestBody): Promise<any>
+```
+
+### Parameters
+
+<ParamField body="name" type="string" required>
+  Display name for the saved funnel.
+</ParamField>
+
+<ParamField body="steps" type="Array<object>" required>
+  Ordered list of funnel steps. Each step has `type`, `value`, and `name` fields — same as `AnalyzeFunnelRequestBody`.
+</ParamField>
+
+### Example
+
+```typescript
+await client.createFunnel({
+    name: 'Signup funnel',
+    steps: [
+        { type: 'page', value: '/', name: 'Home' },
+        { type: 'page', value: '/signup', name: 'Signup page' },
+        { type: 'event', value: 'signup_complete', name: 'Signup complete' },
+    ],
+});
+```
+
+---
+
+## `deleteFunnel`
+
+Permanently deletes a saved funnel.
+
+```typescript
+async deleteFunnel(funnelId: number): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="funnelId" type="number" required>
+  Numeric ID of the funnel to delete.
+</ParamField>
+
+### Example
+
+```typescript
+await client.deleteFunnel(7);
+```

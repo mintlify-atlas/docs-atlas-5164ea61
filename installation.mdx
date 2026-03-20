@@ -1,0 +1,64 @@
+---
+title: Installation
+description: Install rybbit.ts in your server-side project using npm, bun, or deno.
+---
+
+<Note>
+  rybbit.ts is a **server-side only** SDK. It is designed to run in backend
+  runtimes — Node.js, Bun, or Deno — and must never be used in a browser
+  environment, as doing so would expose your API key.
+</Note>
+
+## Prerequisites
+
+You need one of the following runtimes installed:
+
+- **Node.js** v18 or later (for native `fetch` support)
+- **Bun** v1.0 or later
+- **Deno** v1.28 or later
+
+## Install the package
+
+<CodeGroup>
+
+```bash npm
+npm install rybbit.ts
+```
+
+```bash bun
+bun add rybbit.ts
+```
+
+```bash deno
+deno install npm:rybbit.ts
+```
+
+</CodeGroup>
+
+## ESM-only module
+
+rybbit.ts is published as an **ESM-only** package. If you are using Node.js, make sure your project is configured for ESM by setting `"type": "module"` in your `package.json`:
+
+```json package.json
+{
+  "type": "module"
+}
+```
+
+<Warning>
+  CommonJS (`require()`) is not supported. You must use `import` syntax. If your
+  project currently uses CommonJS, you will need to migrate to ESM or use a
+  dynamic `import()` expression.
+</Warning>
+
+## TypeScript
+
+Type definitions are bundled with the package — no separate `@types` package is needed. rybbit.ts is written in TypeScript and exports all types from the top-level entry point.
+
+```typescript
+import rybbit, { type RestConfig, type TrackRequestBody } from 'rybbit.ts';
+```
+
+## Next steps
+
+Once installed, head to the [Quickstart](/quickstart) to initialize the client and make your first API call.

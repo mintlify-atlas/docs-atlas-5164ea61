@@ -1,0 +1,299 @@
+---
+title: Overview
+description: Retrieve high-level analytics, time-series data, dimensional breakdowns, and live visitor counts.
+---
+
+## Common types
+
+### `DateString`
+
+A date formatted as `YYYY-MM-DD`.
+
+```typescript
+type DateString = `${number}-${number}-${number}`;
+// Example: "2024-01-31"
+```
+
+### `TimeZone`
+
+A named timezone used to localise date-range queries. Accepts `"system"` to use the server's local timezone, or any of the following IANA timezone strings:
+
+```
+"system" | "Pacific/Honolulu" | "America/Anchorage" | "America/Los_Angeles"
+"America/Denver" | "America/Chicago" | "America/New_York" | "America/Halifax"
+"America/Sao_Paulo" | "Atlantic/South_Georgia" | "Atlantic/Azores" | "UTC"
+"Europe/London" | "Europe/Paris" | "Europe/Berlin" | "Europe/Helsinki"
+"Europe/Moscow" | "Asia/Dubai" | "Asia/Karachi" | "Asia/Kolkata"
+"Asia/Dhaka" | "Asia/Bangkok" | "Asia/Singapore" | "Asia/Shanghai"
+"Asia/Tokyo" | "Australia/Sydney" | "Pacific/Auckland"
+```
+
+### `Bucket`
+
+The time granularity for time-series queries.
+
+```typescript
+type Bucket =
+    | 'minute'
+    | 'five_minutes'
+    | 'ten_minutes'
+    | 'fifteen_minutes'
+    | 'hour'
+    | 'day'
+    | 'week'
+    | 'month'
+    | 'year';
+```
+
+### `Parameter`
+
+The dimension to group results by in `getMetric`.
+
+```typescript
+type Parameter =
+    | 'pathname'        // URL path
+    | 'page_title'      // Document title
+    | 'country'         // Visitor country
+    | 'region'          // Visitor region / state
+    | 'city'            // Visitor city
+    | 'browser'         // Browser name
+    | 'operating_system'// OS name
+    | 'device_type'     // desktop | mobile | tablet
+    | 'referrer'        // Referring URL
+    | 'channel'         // Traffic channel
+    | 'utm_source'
+    | 'utm_medium'
+    | 'utm_campaign'
+    | 'utm_term'
+    | 'utm_content'
+    | 'language'        // Browser language
+    | 'entry_page'      // First page of session
+    | 'exit_page'       // Last page of session
+    | 'event_name';     // Custom event name
+```
+
+### `Filter`
+
+Apply one or more filters to narrow query results.
+
+```typescript
+interface Filter {
+    parameter: FilterParameter; // Field to filter on
+    type: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'regex';
+    value: string[];            // One or more values
+}
+```
+
+`FilterParameter` can be any of: `country`, `region`, `city`, `browser`, `operating_system`, `device_type`, `pathname`, `referrer`, `utm_source`, `utm_medium`, `utm_campaign`, `channel`, `entry_page`, `exit_page`, `language`.
+
+---
+
+## `getOverview`
+
+Returns high-level aggregate analytics metrics for the site over the specified date range.
+
+```typescript
+async getOverview(options: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone used to interpret the date range. Defaults to `"UTC"`.
+</ParamField>
+
+<ParamField query="filters" type="Filter[]">
+  Array of filters to apply to the query.
+</ParamField>
+
+### Example
+
+```typescript
+import { Rest } from 'rybbit';
+
+const client = new Rest({
+    domain: 'https://app.rybbit.io',
+    siteId: 42,
+    apiKey: 'YOUR_API_KEY'
+});
+
+const overview = await client.getOverview({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    timezone: 'America/New_York'
+});
+
+console.log(overview);
+```
+
+---
+
+## `getOverviewTimeSeries`
+
+Returns time-series analytics data broken down by time bucket for the specified date range.
+
+```typescript
+async getOverviewTimeSeries(options: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    bucket?: Bucket;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone used to interpret the date range.
+</ParamField>
+
+<ParamField query="filters" type="Filter[]">
+  Array of filters to apply to the query.
+</ParamField>
+
+<ParamField query="bucket" type="Bucket">
+  The time granularity for each data point. For example, `"day"` returns one entry per day, `"hour"` returns one per hour.
+</ParamField>
+
+### Example
+
+```typescript
+const timeSeries = await client.getOverviewTimeSeries({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    timezone: 'Europe/London',
+    bucket: 'day'
+});
+
+console.log(timeSeries);
+```
+
+<Tip>
+  Use a finer bucket like `"hour"` or `"fifteen_minutes"` when querying short date ranges for more granular data, and a coarser bucket like `"week"` or `"month"` for long-range trend views.
+</Tip>
+
+---
+
+## `getMetric`
+
+Returns analytics results broken down by a specific dimension (parameter), with optional pagination.
+
+```typescript
+async getMetric(
+    parameter: Parameter,
+    options: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+        limit?: number;
+        page?: number;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="parameter" type="Parameter" required>
+  The dimension to group analytics by (e.g. `"country"`, `"pathname"`, `"browser"`).
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone used to interpret the date range.
+</ParamField>
+
+<ParamField query="filters" type="Filter[]">
+  Array of filters to apply to the query.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Maximum number of results to return per page.
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for paginated results (1-indexed).
+</ParamField>
+
+### Example
+
+```typescript
+// Top countries by visits in January 2024
+const countries = await client.getMetric('country', {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    limit: 10,
+    page: 1
+});
+
+console.log(countries);
+
+// Top pages with a device type filter
+const mobilePages = await client.getMetric('pathname', {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    filters: [{ parameter: 'device_type', type: 'equals', value: ['mobile'] }],
+    limit: 20
+});
+```
+
+---
+
+## `getLiveVisitors`
+
+Returns the count of active sessions within the specified rolling time window.
+
+```typescript
+async getLiveVisitors(minutes?: number): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="minutes" type="number">
+  The size of the rolling window in minutes. If omitted, the API uses its default window.
+</ParamField>
+
+### Example
+
+```typescript
+// Visitors active in the last 5 minutes
+const live = await client.getLiveVisitors(5);
+console.log(live);
+
+// Visitors active in the last 30 minutes
+const recent = await client.getLiveVisitors(30);
+console.log(recent);
+```
+
+<Tip>
+  Poll `getLiveVisitors` on a short interval (e.g. every 30 seconds) to power a real-time visitor counter on your dashboard.
+</Tip>

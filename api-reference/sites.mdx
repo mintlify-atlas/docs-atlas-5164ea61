@@ -1,0 +1,216 @@
+---
+title: Sites
+description: Retrieve, configure, and manage sites in your Rybbit account.
+---
+
+## `getSite`
+
+Returns details for a specific site.
+
+```typescript
+async getSite(): Promise<GetSiteResponse>
+```
+
+### Response
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | Internal record ID |
+| `siteId` | `number` | Numeric site ID |
+| `name` | `string` | Display name of the site |
+| `domain` | `string` | Domain the site tracks |
+| `createdAt` | `string` | ISO 8601 creation timestamp |
+| `updatedAt` | `string` | ISO 8601 last-updated timestamp |
+| `createdBy` | `string` | User ID of the creator |
+| `organizationId` | `string` | Organization this site belongs to |
+| `saltUserIds` | `boolean` | Whether user IDs are salted for privacy |
+| `public` | `boolean` | Whether the dashboard is publicly accessible |
+| `blockBots` | `boolean` | Whether bot traffic is filtered out |
+| `trackIp` | `boolean` | Whether IP addresses are recorded |
+| `isOwner` | `boolean` | Whether the authenticated user is the owner |
+| `sessionReplay` | `boolean` | Whether session replay is enabled |
+| `webVitals` | `boolean` | Whether Core Web Vitals tracking is enabled |
+| `trackErrors` | `boolean` | Whether JavaScript errors are tracked |
+| `trackOutbound` | `boolean` | Whether outbound link clicks are tracked |
+| `trackUrlParams` | `boolean` | Whether URL query parameters are recorded |
+| `trackInitialPageView` | `boolean` | Whether the initial page view on load is tracked |
+| `trackSpaNavigation` | `boolean` | Whether client-side SPA navigations are tracked |
+| `trackButtonClicks` | `boolean` | Whether button clicks are tracked |
+| `trackCopy` | `boolean` | Whether copy events are tracked |
+| `trackFormInteractions` | `boolean` | Whether form interactions are tracked |
+
+### Example
+
+```typescript
+import { Rest } from 'rybbit';
+
+const client = new Rest({
+    domain: 'https://app.rybbit.io',
+    siteId: 42,
+    apiKey: 'YOUR_API_KEY'
+});
+
+const site = await client.getSite();
+console.log(site.name, site.domain);
+```
+
+---
+
+## `deleteSite`
+
+Permanently deletes a site and all its associated data.
+
+<Note>
+  Requires **admin** or **owner** role on the site. This action is irreversible — all analytics data will be lost.
+</Note>
+
+```typescript
+async deleteSite(): Promise<SuccessResponse>
+```
+
+### Response
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | `boolean` | `true` when the site was deleted successfully |
+
+### Example
+
+```typescript
+const result = await client.deleteSite();
+console.log(result.success); // true
+```
+
+---
+
+## `updateSiteConfig`
+
+Updates configuration settings for the site.
+
+<Note>
+  Requires **admin** or **owner** role.
+</Note>
+
+```typescript
+async updateSiteConfig(config: UpdateSiteConfigRequestBody): Promise<any>
+```
+
+### Parameters
+
+<ParamField body="config" type="UpdateSiteConfigRequestBody" required>
+  Configuration fields to update.
+
+  <Expandable title="UpdateSiteConfigRequestBody">
+    <ParamField body="public" type="boolean">
+      When `true`, the dashboard is publicly viewable without authentication.
+    </ParamField>
+
+    <ParamField body="blockBots" type="boolean">
+      When `true`, known bot and crawler traffic is filtered from analytics.
+    </ParamField>
+
+    <ParamField body="excludedCountries" type="string[]">
+      Array of ISO 3166-1 alpha-2 country codes whose traffic should be excluded (e.g. `["US", "DE"]`).
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Example
+
+```typescript
+await client.updateSiteConfig({
+    public: true,
+    blockBots: true,
+    excludedCountries: ['CN', 'RU']
+});
+```
+
+---
+
+## `getExcludedIPs`
+
+Returns the list of IP addresses that are excluded from analytics tracking for this site.
+
+```typescript
+async getExcludedIPs(): Promise<any>
+```
+
+### Example
+
+```typescript
+const excluded = await client.getExcludedIPs();
+console.log(excluded);
+```
+
+<Tip>
+  Add your own IP address to the exclusion list to prevent your own visits from skewing analytics data.
+</Tip>
+
+---
+
+## `getExcludedCountries`
+
+Returns the list of country codes that are excluded from analytics tracking for this site.
+
+```typescript
+async getExcludedCountries(): Promise<any>
+```
+
+### Example
+
+```typescript
+const countries = await client.getExcludedCountries();
+console.log(countries);
+```
+
+---
+
+## `getPrivateLinkConfig`
+
+Returns the private link key configuration for the site. The private link key allows sharing a read-only view of the dashboard without making the site fully public.
+
+```typescript
+async getPrivateLinkConfig(): Promise<any>
+```
+
+### Example
+
+```typescript
+const config = await client.getPrivateLinkConfig();
+console.log(config);
+```
+
+---
+
+## `updatePrivateLinkConfig`
+
+Generates a new private link key or revokes the existing one.
+
+<Note>
+  Requires **admin** or **owner** role. Revoking a key immediately invalidates any previously shared private links.
+</Note>
+
+```typescript
+async updatePrivateLinkConfig(
+    action: 'generate_private_link_key' | 'revoke_private_link_key'
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField body="action" type="'generate_private_link_key' | 'revoke_private_link_key'" required>
+  The action to perform on the private link key.
+
+  - `generate_private_link_key` — creates a new shareable private link key.
+  - `revoke_private_link_key` — permanently invalidates the current key.
+</ParamField>
+
+### Example
+
+```typescript
+// Generate a new private link key
+await client.updatePrivateLinkConfig('generate_private_link_key');
+
+// Revoke the existing key
+await client.updatePrivateLinkConfig('revoke_private_link_key');
+```

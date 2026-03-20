@@ -1,0 +1,186 @@
+---
+title: Tracking events
+description: Track pageviews and custom events server-side using the track() method.
+---
+
+The `track()` method sends events to rybbit from your server. Use it to record pageviews and custom events with optional properties, user identity, and geolocation data.
+
+```typescript
+async track(payload: TrackRequestBody): Promise<SuccessResponse>
+```
+
+On success the method resolves to `{ success: true }`.
+
+## Event types
+
+Every call to `track()` must include a `type` field set to either `'pageview'` or `'custom_event'`.
+
+<Tabs>
+  <Tab title="Pageview">
+    ```typescript
+    await analytics.track({
+        type: 'pageview',
+        pathname: '/blog/hello-world',
+        page_title: 'Hello World',
+        referrer: 'https://google.com',
+        hostname: 'example.com',
+        ip_address: req.ip,
+        user_agent: req.headers['user-agent']
+    });
+    ```
+  </Tab>
+  <Tab title="Custom event">
+    ```typescript
+    await analytics.track({
+        type: 'custom_event',
+        event_name: 'user_signup',
+        properties: {
+            plan: 'pro',
+            trial: true
+        },
+        ip_address: req.ip,
+        user_agent: req.headers['user-agent']
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Parameters
+
+<ParamField path="type" type="'pageview' | 'custom_event'" required>
+  The type of event to record. Set to `'pageview'` for page visits or `'custom_event'` for named actions.
+</ParamField>
+
+<ParamField path="event_name" type="string">
+  Required when `type` is `'custom_event'`. A short identifier for the action, such as `'signup'` or `'purchase_completed'`.
+</ParamField>
+
+<ParamField path="properties" type="Record<any, any> | string">
+  Arbitrary metadata to attach to the event. Pass a plain object — the SDK automatically serializes it to JSON before sending. You can also pass a pre-serialized JSON string.
+</ParamField>
+
+<ParamField path="pathname" type="string">
+  The URL path of the page being viewed, for example `/pricing`. Used primarily with `'pageview'` events.
+</ParamField>
+
+<ParamField path="hostname" type="string">
+  The hostname of the site, for example `example.com`. Useful when your server handles multiple domains.
+</ParamField>
+
+<ParamField path="querystring" type="string">
+  The raw query string of the URL, for example `?ref=newsletter`.
+</ParamField>
+
+<ParamField path="page_title" type="string">
+  The human-readable page title shown in the browser tab.
+</ParamField>
+
+<ParamField path="referrer" type="string">
+  The referring URL, for example `https://twitter.com`.
+</ParamField>
+
+<ParamField path="ip_address" type="string">
+  The visitor's IP address. rybbit uses this to determine geolocation (country, region, city). Pass the real client IP from your request object.
+</ParamField>
+
+<ParamField path="user_agent" type="string">
+  The visitor's user agent string. rybbit uses this to identify the browser, operating system, and device type.
+</ParamField>
+
+<ParamField path="user_id" type="string">
+  A stable identifier for the authenticated user, such as a database UUID or email. Enables user-level analytics in rybbit.
+</ParamField>
+
+<ParamField path="language" type="string">
+  The visitor's preferred language, for example `en-US`.
+</ParamField>
+
+<ParamField path="screenWidth" type="number">
+  The visitor's screen width in pixels.
+</ParamField>
+
+<ParamField path="screenHeight" type="number">
+  The visitor's screen height in pixels.
+</ParamField>
+
+## Geolocation from IP and user agent
+
+Because tracking happens server-side, rybbit cannot read the visitor's IP or browser details from a browser context. You must forward these from the incoming HTTP request.
+
+```typescript
+import { analytics } from '../lib/analytics.js';
+
+export async function handler(req, res) {
+    await analytics.track({
+        type: 'pageview',
+        pathname: req.url,
+        ip_address: req.headers['x-forwarded-for'] ?? req.socket.remoteAddress,
+        user_agent: req.headers['user-agent']
+    });
+
+    res.send('OK');
+}
+```
+
+<Note>
+  If you are behind a reverse proxy or load balancer, the real client IP is often in `X-Forwarded-For` rather than `req.socket.remoteAddress`.
+</Note>
+
+## Custom event properties
+
+Pass an object to `properties` — the SDK converts it to a JSON string before sending.
+
+```typescript
+await analytics.track({
+    type: 'custom_event',
+    event_name: 'checkout_completed',
+    properties: {
+        orderId: 'ord_abc123',
+        total: 49.99,
+        currency: 'USD',
+        items: 3
+    },
+    ip_address: req.ip,
+    user_agent: req.headers['user-agent']
+});
+```
+
+If you already have a serialized JSON string, you can pass it directly:
+
+```typescript
+await analytics.track({
+    type: 'custom_event',
+    event_name: 'checkout_completed',
+    properties: '{"orderId":"ord_abc123","total":49.99}'
+});
+```
+
+## Identified users
+
+Set `user_id` to associate the event with a specific user. This unlocks user profiles and per-user session history in rybbit.
+
+```typescript
+await analytics.track({
+    type: 'pageview',
+    pathname: '/dashboard',
+    user_id: currentUser.id,
+    ip_address: req.ip,
+    user_agent: req.headers['user-agent']
+});
+```
+
+```typescript
+await analytics.track({
+    type: 'custom_event',
+    event_name: 'subscription_upgraded',
+    user_id: currentUser.id,
+    properties: {
+        from: 'starter',
+        to: 'pro'
+    }
+});
+```
+
+<Tip>
+  Use a stable, non-PII identifier such as a UUID rather than an email address. This avoids storing personal data in your analytics.
+</Tip>

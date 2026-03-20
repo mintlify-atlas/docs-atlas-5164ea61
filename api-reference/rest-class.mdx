@@ -1,0 +1,249 @@
+---
+title: Rest class
+description: The primary client class for interacting with the rybbit analytics API.
+---
+
+The `Rest` class is the default export of `rybbit.ts`. It wraps every API endpoint as a typed async method, manages your API key securely, and automatically scopes requests to your configured site.
+
+## Import
+
+```typescript
+import Rest from 'rybbit.ts';
+```
+
+## Constructor
+
+```typescript
+constructor(config: RestConfig)
+```
+
+Creates a new `Rest` instance bound to a specific rybbit instance and site.
+
+```typescript
+const client = new Rest({
+  domain: 'https://app.rybbit.io',
+  siteId: 42,
+  apiKey: 'your-api-key',
+});
+```
+
+### RestConfig
+
+<ParamField path="domain" type="string" required>
+  The base URL of your rybbit instance. Example: `https://app.rybbit.io`.
+</ParamField>
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site you want to query. You can find this in your rybbit dashboard.
+</ParamField>
+
+<ParamField path="apiKey" type="string" required>
+  Your rybbit API key. This is sent as a `Bearer` token on every request and is never exposed as a public property.
+</ParamField>
+
+## Public properties
+
+### `routes`
+
+```typescript
+routes: Routes
+```
+
+A `Routes` instance constructed from the configured `domain`. You can use this directly to build typed `URL` objects without making an HTTP request. See the [Routes class](/api-reference/routes-class) reference.
+
+### `siteId`
+
+```typescript
+siteId: SiteId
+```
+
+The numeric site ID provided at construction time. All site-scoped API methods use this value automatically.
+
+## `request` method
+
+```typescript
+async request<T>(
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  url: URL,
+  body?: any
+): Promise<T>
+```
+
+Sends an authenticated HTTP request. All typed API methods on `Rest` call this internally. You can also call it directly when you need to hit an endpoint that is not yet wrapped.
+
+<ParamField path="method" type="'GET' | 'POST' | 'PUT' | 'DELETE'" required>
+  The HTTP method to use.
+</ParamField>
+
+<ParamField path="url" type="URL" required>
+  The fully-constructed request URL. Use `this.routes` (or a `Routes` instance) to build typed URLs.
+</ParamField>
+
+<ParamField path="body" type="any">
+  Optional request body. Serialized as JSON and sent with a `Content-Type: application/json` header.
+</ParamField>
+
+<ResponseField name="Promise<T>" type="Promise<T>">
+  Resolves with the parsed JSON response typed as `T`. Rejects with an [`ErrorResponse`](/api-reference/request-function#errorresponse) if the request fails.
+</ResponseField>
+
+<Note>
+  The `request` method delegates to the standalone [`request`](/api-reference/request-function) function, passing your API key automatically. You do not need to handle authentication yourself.
+</Note>
+
+## API methods
+
+Every method automatically uses the `siteId` configured at construction time. All methods return a `Promise` that resolves with the parsed API response or rejects with an [`ErrorResponse`](/api-reference/request-function#errorresponse).
+
+<AccordionGroup>
+
+<Accordion title="Sites">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getSite()` | `GET` | Returns details for the configured site. |
+| `deleteSite()` | `DELETE` | Permanently deletes the site and all its data. Requires admin/owner role. |
+| `updateSiteConfig(config)` | `PUT` | Updates site configuration settings. Requires admin/owner role. |
+| `getExcludedIPs()` | `GET` | Returns the list of excluded IP addresses. |
+| `getExcludedCountries()` | `GET` | Returns the list of excluded country codes. |
+| `getPrivateLinkConfig()` | `GET` | Returns the private link key configuration. |
+| `updatePrivateLinkConfig(action)` | `POST` | Generates or revokes a private link key. Requires admin/owner role. |
+
+See the [Routes class](/api-reference/routes-class#sites) for the underlying URL patterns.
+
+</Accordion>
+
+<Accordion title="Organizations">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getMyOrganizations()` | `GET` | Returns all organizations the authenticated user belongs to, including all members for each organization. |
+| `createSite(organizationId, details)` | `POST` | Creates a new site in an organization. Requires admin/owner role. |
+| `getOrganizationMembers(organizationId)` | `GET` | Returns all members of an organization with user details. |
+| `addOrganizationMember(organizationId, member)` | `POST` | Adds a user to an organization with a specified role. |
+
+</Accordion>
+
+<Accordion title="Overview">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getOverview(options)` | `GET` | Returns high-level analytics metrics for the site. |
+| `getOverviewTimeSeries(options)` | `GET` | Returns time-series analytics data broken down by time buckets. |
+| `getMetric(parameter, options)` | `GET` | Returns dimensional analytics broken down by a specific parameter. |
+| `getLiveVisitors(minutes?)` | `GET` | Returns the count of active sessions within the specified time window. |
+
+</Accordion>
+
+<Accordion title="Events">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getEvents(options)` | `GET` | Returns a paginated list of events with cursor-based pagination. |
+| `getEventNames(options)` | `GET` | Returns unique custom event names with counts. |
+| `getEventProperties(eventName, options)` | `GET` | Returns property key-value pairs for a specific event. |
+| `getOutboundLinks(options)` | `GET` | Returns outbound link clicks with occurrence counts. |
+
+</Accordion>
+
+<Accordion title="Errors">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getErrorNames(options)` | `GET` | Returns unique error messages with occurrence and session counts. |
+| `getErrorEvents(errorMessage, options)` | `GET` | Returns individual error occurrences with context and stack traces. |
+| `getErrorTimeSeries(errorMessage, options)` | `GET` | Returns error occurrence counts over time. |
+
+</Accordion>
+
+<Accordion title="Goals">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getGoals(options)` | `GET` | Returns a paginated list of goals with conversion metrics. |
+| `getGoalSessions(goalId, options)` | `GET` | Returns sessions that completed a specific goal. |
+| `createGoal(goal)` | `POST` | Creates a new goal. |
+| `updateGoal(goalId, goal)` | `PUT` | Updates an existing goal. |
+| `deleteGoal(goalId)` | `DELETE` | Deletes a goal. |
+
+</Accordion>
+
+<Accordion title="Funnels">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getFunnels()` | `GET` | Returns all saved funnels for the site. |
+| `analyzeFunnel(funnel, options)` | `POST` | Analyzes funnel conversion data step-by-step. |
+| `getFunnelStepSessions(funnel, stepNumber, mode, options)` | `POST` | Returns sessions that reached or dropped at a specific funnel step. |
+| `createFunnel(funnel)` | `POST` | Creates a saved funnel. |
+| `deleteFunnel(funnelId)` | `DELETE` | Deletes a saved funnel. |
+
+</Accordion>
+
+<Accordion title="Performance">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getPerformanceOverview(options)` | `GET` | Returns aggregate Core Web Vitals metrics. |
+| `getPerformanceTimeSeries(options)` | `GET` | Returns performance metrics over time. |
+| `getPerformanceByDimension(dimension, options)` | `GET` | Returns performance breakdown by dimension. |
+
+</Accordion>
+
+<Accordion title="Sessions">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getSessions(options)` | `GET` | Returns a paginated list of sessions. |
+| `getSession(sessionId, options)` | `GET` | Returns detailed session information with events. |
+| `getSessionLocations(options)` | `GET` | Returns aggregated session locations for map visualization. |
+
+</Accordion>
+
+<Accordion title="Users">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getUsers(options)` | `GET` | Returns a paginated list of users. |
+| `getUserSessionCount(userId, options)` | `GET` | Returns daily session counts for a specific user. |
+| `getUserInfo(userId)` | `GET` | Returns detailed user profile information. |
+
+</Accordion>
+
+<Accordion title="Misc">
+
+| Method | HTTP | Description |
+|---|---|---|
+| `getRetention(options)` | `GET` | Returns cohort-based retention analysis. |
+| `getJourneys(options)` | `GET` | Returns the most common page navigation paths. |
+| `track(payload)` | `POST` | Tracks a pageview or custom event. |
+
+</Accordion>
+
+</AccordionGroup>
+
+## Example
+
+```typescript
+import Rest from 'rybbit.ts';
+
+const client = new Rest({
+  domain: 'https://app.rybbit.io',
+  siteId: 42,
+  apiKey: process.env.RYBBIT_API_KEY!,
+});
+
+// Fetch high-level metrics for the past week
+const overview = await client.getOverview({
+  startDate: '2024-01-01',
+  endDate: '2024-01-07',
+  timezone: 'America/New_York',
+});
+
+// Track a custom event
+await client.track({
+  type: 'custom_event',
+  event_name: 'signup',
+  pathname: '/register',
+});
+```

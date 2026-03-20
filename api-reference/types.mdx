@@ -1,0 +1,747 @@
+---
+title: Types
+description: Full TypeScript type definitions and utility functions exported by rybbit.ts.
+---
+
+<AccordionGroup>
+
+<Accordion title="DateString">
+
+A date formatted as `year-month-day`.
+
+```typescript
+type DateString = `${number}-${number}-${number}`;
+```
+
+**Example:** `"2024-01-31"`
+
+</Accordion>
+
+<Accordion title="Timestamp">
+
+An ISO 8601 formatted datetime string.
+
+```typescript
+type Timestamp = string;
+```
+
+**Example:** `"2024-01-31T14:00:00.000Z"`
+
+</Accordion>
+
+<Accordion title="TimeZone">
+
+All supported timezone identifiers.
+
+```typescript
+type TimeZone =
+    | 'system'
+    | 'Pacific/Honolulu'
+    | 'America/Anchorage'
+    | 'America/Los_Angeles'
+    | 'America/Denver'
+    | 'America/Chicago'
+    | 'America/New_York'
+    | 'America/Halifax'
+    | 'America/Sao_Paulo'
+    | 'Atlantic/South_Georgia'
+    | 'Atlantic/Azores'
+    | 'UTC'
+    | 'Europe/London'
+    | 'Europe/Paris'
+    | 'Europe/Berlin'
+    | 'Europe/Helsinki'
+    | 'Europe/Moscow'
+    | 'Asia/Dubai'
+    | 'Asia/Karachi'
+    | 'Asia/Kolkata'
+    | 'Asia/Dhaka'
+    | 'Asia/Bangkok'
+    | 'Asia/Singapore'
+    | 'Asia/Shanghai'
+    | 'Asia/Tokyo'
+    | 'Australia/Sydney'
+    | 'Pacific/Auckland';
+```
+
+| Value | UTC Offset |
+|-------|------------|
+| `system` | Server system timezone |
+| `Pacific/Honolulu` | UTC−10 |
+| `America/Anchorage` | UTC−9 |
+| `America/Los_Angeles` | UTC−8 |
+| `America/Denver` | UTC−7 |
+| `America/Chicago` | UTC−6 |
+| `America/New_York` | UTC−5 |
+| `America/Halifax` | UTC−4 |
+| `America/Sao_Paulo` | UTC−3 |
+| `Atlantic/South_Georgia` | UTC−2 |
+| `Atlantic/Azores` | UTC−1 |
+| `UTC` | UTC±0 |
+| `Europe/London` | UTC+0/+1 |
+| `Europe/Paris` | UTC+1/+2 |
+| `Europe/Berlin` | UTC+1/+2 |
+| `Europe/Helsinki` | UTC+2/+3 |
+| `Europe/Moscow` | UTC+3 |
+| `Asia/Dubai` | UTC+4 |
+| `Asia/Karachi` | UTC+5 |
+| `Asia/Kolkata` | UTC+5:30 |
+| `Asia/Dhaka` | UTC+6 |
+| `Asia/Bangkok` | UTC+7 |
+| `Asia/Singapore` | UTC+8 |
+| `Asia/Shanghai` | UTC+8 |
+| `Asia/Tokyo` | UTC+9 |
+| `Australia/Sydney` | UTC+10/+11 |
+| `Pacific/Auckland` | UTC+12/+13 |
+
+</Accordion>
+
+<Accordion title="Bucket">
+
+Time bucket sizes for grouping time-series data.
+
+```typescript
+type Bucket =
+    | 'minute'
+    | 'five_minutes'
+    | 'ten_minutes'
+    | 'fifteen_minutes'
+    | 'hour'
+    | 'day'
+    | 'week'
+    | 'month'
+    | 'year';
+```
+
+| Value | Description |
+|-------|-------------|
+| `minute` | One-minute intervals |
+| `five_minutes` | Five-minute intervals |
+| `ten_minutes` | Ten-minute intervals |
+| `fifteen_minutes` | Fifteen-minute intervals |
+| `hour` | Hourly intervals |
+| `day` | Daily intervals |
+| `week` | Weekly intervals |
+| `month` | Monthly intervals |
+| `year` | Yearly intervals |
+
+</Accordion>
+
+<Accordion title="Parameter">
+
+Analytics dimensions available for metric breakdowns.
+
+```typescript
+type Parameter =
+    | 'pathname'
+    | 'page_title'
+    | 'country'
+    | 'region'
+    | 'city'
+    | 'browser'
+    | 'operating_system'
+    | 'device_type'
+    | 'referrer'
+    | 'channel'
+    | 'utm_source'
+    | 'utm_medium'
+    | 'utm_campaign'
+    | 'utm_term'
+    | 'utm_content'
+    | 'language'
+    | 'entry_page'
+    | 'exit_page'
+    | 'event_name';
+```
+
+| Value | Description |
+|-------|-------------|
+| `pathname` | URL path |
+| `page_title` | Page `<title>` |
+| `country` | Visitor country |
+| `region` | Visitor region/state |
+| `city` | Visitor city |
+| `browser` | Browser name |
+| `operating_system` | OS name |
+| `device_type` | Device category (desktop, mobile, tablet) |
+| `referrer` | Referring URL |
+| `channel` | Traffic channel |
+| `utm_source` | UTM source |
+| `utm_medium` | UTM medium |
+| `utm_campaign` | UTM campaign |
+| `utm_term` | UTM term |
+| `utm_content` | UTM content |
+| `language` | Browser language |
+| `entry_page` | First page in session |
+| `exit_page` | Last page in session |
+| `event_name` | Custom event name |
+
+</Accordion>
+
+<Accordion title="SortBy">
+
+Available sort fields for list endpoints.
+
+```typescript
+type SortBy =
+    | 'goalId'
+    | 'name'
+    | 'goalType'
+    | 'createdAt'
+    | 'first_seen'
+    | 'last_seen'
+    | 'pageviews'
+    | 'sessions'
+    | 'events';
+```
+
+</Accordion>
+
+<Accordion title="Order">
+
+Sort direction.
+
+```typescript
+type Order = 'asc' | 'desc';
+```
+
+</Accordion>
+
+<Accordion title="Mode">
+
+Used for retention cohort grouping and funnel step session filtering.
+
+```typescript
+type Mode = 'day' | 'week' | 'reached' | 'dropped';
+```
+
+| Value | Description |
+|-------|-------------|
+| `day` | Group by day |
+| `week` | Group by week |
+| `reached` | Sessions that reached the step |
+| `dropped` | Sessions that dropped off at the step |
+
+</Accordion>
+
+<Accordion title="Dimension">
+
+Dimensions available for performance breakdowns.
+
+```typescript
+type Dimension = 'pathname' | 'country' | 'browser' | 'operating_system' | 'device_type';
+```
+
+| Value | Description |
+|-------|-------------|
+| `pathname` | URL path |
+| `country` | Visitor country |
+| `browser` | Browser name |
+| `operating_system` | OS name |
+| `device_type` | Device category |
+
+</Accordion>
+
+<Accordion title="FilterParameter">
+
+Dimensions that can be used in filter objects.
+
+```typescript
+type FilterParameter =
+    | 'country'
+    | 'region'
+    | 'city'
+    | 'browser'
+    | 'operating_system'
+    | 'device_type'
+    | 'pathname'
+    | 'referrer'
+    | 'utm_source'
+    | 'utm_medium'
+    | 'utm_campaign'
+    | 'channel'
+    | 'entry_page'
+    | 'exit_page'
+    | 'language';
+```
+
+</Accordion>
+
+<Accordion title="FilterType">
+
+Comparison operators for filter conditions.
+
+```typescript
+type FilterType = 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'regex';
+```
+
+| Value | Description |
+|-------|-------------|
+| `equals` | Exact match |
+| `not_equals` | Does not match |
+| `contains` | Substring match |
+| `not_contains` | Does not contain substring |
+| `regex` | Regular expression match |
+
+</Accordion>
+
+<Accordion title="Filter">
+
+A filter object used to narrow analytics queries.
+
+```typescript
+interface Filter {
+    parameter: FilterParameter;
+    type: FilterType;
+    value: Array<string>;
+}
+```
+
+<ResponseField name="parameter" type="FilterParameter" required>
+  The dimension to filter on. See [FilterParameter](#filterparameter).
+</ResponseField>
+
+<ResponseField name="type" type="FilterType" required>
+  The comparison operator. See [FilterType](#filtertype).
+</ResponseField>
+
+<ResponseField name="value" type="Array<string>" required>
+  One or more values to match against.
+</ResponseField>
+
+**Example:**
+
+```typescript
+const filter: Filter = {
+    parameter: 'country',
+    type: 'equals',
+    value: ['US', 'CA'],
+};
+```
+
+</Accordion>
+
+<Accordion title="SiteId">
+
+The numeric identifier for a tracked site.
+
+```typescript
+type SiteId = number;
+```
+
+</Accordion>
+
+<Accordion title="RestConfig">
+
+Configuration object passed to the `Rest` constructor.
+
+```typescript
+interface RestConfig {
+    domain: string;
+    siteId: SiteId;
+    apiKey: string;
+}
+```
+
+<ResponseField name="domain" type="string" required>
+  The base URL of your rybbit instance (e.g. `"https://app.rybbit.io"`).
+</ResponseField>
+
+<ResponseField name="siteId" type="SiteId" required>
+  The numeric ID of the site you want to query.
+</ResponseField>
+
+<ResponseField name="apiKey" type="string" required>
+  Your rybbit API key, used for Bearer token authentication.
+</ResponseField>
+
+**Example:**
+
+```typescript
+import { Rest } from 'rybbit';
+
+const client = new Rest({
+    domain: 'https://app.rybbit.io',
+    siteId: 123,
+    apiKey: 'your-api-key',
+});
+```
+
+</Accordion>
+
+<Accordion title="GetSiteResponse">
+
+Response object returned by `getSite()`.
+
+```typescript
+interface GetSiteResponse {
+    id: string;
+    siteId: SiteId;
+    name: string;
+    domain: string;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+    createdBy: string;
+    organizationId: string;
+    saltUserIds: boolean;
+    public: boolean;
+    blockBots: boolean;
+    trackIp: boolean;
+    isOwner: boolean;
+    sessionReplay: boolean;
+    webVitals: boolean;
+    trackErrors: boolean;
+    trackOutbound: boolean;
+    trackUrlParams: boolean;
+    trackInitialPageView: boolean;
+    trackSpaNavigation: boolean;
+    trackButtonClicks: boolean;
+    trackCopy: boolean;
+    trackFormInteractions: boolean;
+}
+```
+
+<ResponseField name="id" type="string">Internal record ID.</ResponseField>
+<ResponseField name="siteId" type="SiteId">Numeric site ID.</ResponseField>
+<ResponseField name="name" type="string">Display name of the site.</ResponseField>
+<ResponseField name="domain" type="string">Tracked domain.</ResponseField>
+<ResponseField name="createdAt" type="Timestamp">Creation timestamp.</ResponseField>
+<ResponseField name="updatedAt" type="Timestamp">Last update timestamp.</ResponseField>
+<ResponseField name="createdBy" type="string">User ID of the creator.</ResponseField>
+<ResponseField name="organizationId" type="string">Organization this site belongs to.</ResponseField>
+<ResponseField name="saltUserIds" type="boolean">Whether user IDs are salted for privacy.</ResponseField>
+<ResponseField name="public" type="boolean">Whether the site dashboard is publicly accessible.</ResponseField>
+<ResponseField name="blockBots" type="boolean">Whether bot traffic is filtered.</ResponseField>
+<ResponseField name="trackIp" type="boolean">Whether IP addresses are tracked.</ResponseField>
+<ResponseField name="isOwner" type="boolean">Whether the authenticated user is the site owner.</ResponseField>
+<ResponseField name="sessionReplay" type="boolean">Whether session replay is enabled.</ResponseField>
+<ResponseField name="webVitals" type="boolean">Whether Core Web Vitals tracking is enabled.</ResponseField>
+<ResponseField name="trackErrors" type="boolean">Whether JavaScript error tracking is enabled.</ResponseField>
+<ResponseField name="trackOutbound" type="boolean">Whether outbound link clicks are tracked.</ResponseField>
+<ResponseField name="trackUrlParams" type="boolean">Whether URL query parameters are included.</ResponseField>
+<ResponseField name="trackInitialPageView" type="boolean">Whether the initial page view is tracked on load.</ResponseField>
+<ResponseField name="trackSpaNavigation" type="boolean">Whether SPA route changes are tracked.</ResponseField>
+<ResponseField name="trackButtonClicks" type="boolean">Whether button click events are tracked.</ResponseField>
+<ResponseField name="trackCopy" type="boolean">Whether copy events are tracked.</ResponseField>
+<ResponseField name="trackFormInteractions" type="boolean">Whether form interaction events are tracked.</ResponseField>
+
+</Accordion>
+
+<Accordion title="SuccessResponse">
+
+Standard response for write operations (create, update, delete).
+
+```typescript
+interface SuccessResponse {
+    success: boolean;
+}
+```
+
+<ResponseField name="success" type="boolean" required>
+  `true` if the operation completed successfully.
+</ResponseField>
+
+</Accordion>
+
+<Accordion title="UpdateSiteConfigRequestBody">
+
+Request body for `updateSiteConfig()`.
+
+```typescript
+interface UpdateSiteConfigRequestBody {
+    public?: boolean;
+    blockBots?: boolean;
+    excludedCountries?: Array<string>;
+}
+```
+
+<ResponseField name="public" type="boolean">Make the site dashboard publicly accessible.</ResponseField>
+<ResponseField name="blockBots" type="boolean">Enable or disable bot filtering.</ResponseField>
+<ResponseField name="excludedCountries" type="Array<string>">List of ISO 3166-1 alpha-2 country codes to exclude from tracking.</ResponseField>
+
+</Accordion>
+
+<Accordion title="UpdatePrivateLinkRequestBody">
+
+Request body for `updatePrivateLinkConfig()`.
+
+```typescript
+interface UpdatePrivateLinkRequestBody {
+    action: 'revoke_private_link_key' | 'generate_private_link_key';
+}
+```
+
+<ResponseField name="action" type="string" required>
+  `'generate_private_link_key'` to create a new key, or `'revoke_private_link_key'` to invalidate the current key.
+</ResponseField>
+
+</Accordion>
+
+<Accordion title="CreateSiteRequestBody">
+
+Request body for `createSite()`.
+
+```typescript
+interface CreateSiteRequestBody {
+    domain: string;
+    name: string;
+    public?: boolean;
+    blockBots?: boolean;
+    saltUserIds?: boolean;
+    excludedIPs?: Array<string>;
+    excludedCountries?: Array<string>;
+    sessionReplay?: boolean;
+    webVitals?: boolean;
+    trackErrors?: boolean;
+    trackOutbound?: boolean;
+    trackUrlParams?: boolean;
+    trackInitialPageView?: boolean;
+    trackSpaNavigation?: boolean;
+    trackIp?: boolean;
+    trackButtonClicks?: boolean;
+    trackCopy?: boolean;
+    trackFormInteractions?: boolean;
+    tags?: Array<string>;
+}
+```
+
+<ResponseField name="domain" type="string" required>The domain to track (e.g. `"example.com"`).</ResponseField>
+<ResponseField name="name" type="string" required>Display name for the site.</ResponseField>
+<ResponseField name="public" type="boolean">Make the dashboard publicly accessible.</ResponseField>
+<ResponseField name="blockBots" type="boolean">Filter bot traffic.</ResponseField>
+<ResponseField name="saltUserIds" type="boolean">Salt user IDs for privacy.</ResponseField>
+<ResponseField name="excludedIPs" type="Array<string>">IP addresses to exclude from tracking.</ResponseField>
+<ResponseField name="excludedCountries" type="Array<string>">Country codes to exclude from tracking.</ResponseField>
+<ResponseField name="sessionReplay" type="boolean">Enable session replay.</ResponseField>
+<ResponseField name="webVitals" type="boolean">Enable Core Web Vitals collection.</ResponseField>
+<ResponseField name="trackErrors" type="boolean">Enable JavaScript error tracking.</ResponseField>
+<ResponseField name="trackOutbound" type="boolean">Track outbound link clicks.</ResponseField>
+<ResponseField name="trackUrlParams" type="boolean">Include URL query parameters.</ResponseField>
+<ResponseField name="trackInitialPageView" type="boolean">Track the initial page view on load.</ResponseField>
+<ResponseField name="trackSpaNavigation" type="boolean">Track SPA route changes.</ResponseField>
+<ResponseField name="trackIp" type="boolean">Store visitor IP addresses.</ResponseField>
+<ResponseField name="trackButtonClicks" type="boolean">Track button click events.</ResponseField>
+<ResponseField name="trackCopy" type="boolean">Track copy events.</ResponseField>
+<ResponseField name="trackFormInteractions" type="boolean">Track form interaction events.</ResponseField>
+<ResponseField name="tags" type="Array<string>">Arbitrary tags to attach to the site.</ResponseField>
+
+</Accordion>
+
+<Accordion title="AddOrganizationMemberRequestBody">
+
+Request body for `addOrganizationMember()`.
+
+```typescript
+interface AddOrganizationMemberRequestBody {
+    email: string;
+    role: 'admin' | 'member' | 'owner';
+}
+```
+
+<ResponseField name="email" type="string" required>Email address of the user to add.</ResponseField>
+<ResponseField name="role" type="'admin' | 'member' | 'owner'" required>Role to assign to the new member.</ResponseField>
+
+</Accordion>
+
+<Accordion title="CreateGoalRequestBody">
+
+Request body for `createGoal()`.
+
+```typescript
+interface CreateGoalRequestBody {
+    name: string;
+    goalType: 'path' | 'event';
+    config: {
+        pathPattern?: string;
+        eventName?: string;
+    };
+}
+```
+
+<ResponseField name="name" type="string" required>Display name for the goal.</ResponseField>
+<ResponseField name="goalType" type="'path' | 'event'" required>Whether the goal tracks a URL path or a custom event.</ResponseField>
+<ResponseField name="config.pathPattern" type="string">URL path pattern (used when `goalType` is `'path'`).</ResponseField>
+<ResponseField name="config.eventName" type="string">Event name (used when `goalType` is `'event'`).</ResponseField>
+
+</Accordion>
+
+<Accordion title="UpdateGoalRequestBody">
+
+Request body for `updateGoal()`. Identical fields to `CreateGoalRequestBody`.
+
+```typescript
+interface UpdateGoalRequestBody extends CreateGoalRequestBody {}
+```
+
+See [CreateGoalRequestBody](#creategoalrequestbody) for all fields.
+
+</Accordion>
+
+<Accordion title="AnalyzeFunnelRequestBody">
+
+Request body for `analyzeFunnel()`.
+
+```typescript
+interface AnalyzeFunnelRequestBody {
+    steps: Array<{
+        type: 'page' | 'event';
+        value: string;
+        name: string;
+    }>;
+}
+```
+
+<ResponseField name="steps" type="Array<object>" required>
+  Ordered list of funnel steps.
+</ResponseField>
+<ResponseField name="steps[].type" type="'page' | 'event'" required>Whether this step is a page view or a custom event.</ResponseField>
+<ResponseField name="steps[].value" type="string" required>The path or event name to match.</ResponseField>
+<ResponseField name="steps[].name" type="string" required>Display name for this step.</ResponseField>
+
+</Accordion>
+
+<Accordion title="GetFunnelStepSessionsRequestBody">
+
+Request body for `getFunnelStepSessions()`. Identical fields to `AnalyzeFunnelRequestBody`.
+
+```typescript
+interface GetFunnelStepSessionsRequestBody extends AnalyzeFunnelRequestBody {}
+```
+
+See [AnalyzeFunnelRequestBody](#analyzefunnelrequestbody) for all fields.
+
+</Accordion>
+
+<Accordion title="CreateFunnelRequestBody">
+
+Request body for `createFunnel()`. Extends `AnalyzeFunnelRequestBody` with a required `name`.
+
+```typescript
+interface CreateFunnelRequestBody extends AnalyzeFunnelRequestBody {
+    name: string;
+}
+```
+
+<ResponseField name="name" type="string" required>Display name for the saved funnel.</ResponseField>
+<ResponseField name="steps" type="Array<object>" required>Funnel steps. See [AnalyzeFunnelRequestBody](#analyzefunnelrequestbody).</ResponseField>
+
+</Accordion>
+
+<Accordion title="TrackRequestBody">
+
+Request body for `track()`.
+
+```typescript
+interface TrackRequestBody {
+    type: 'pageview' | 'custom_event';
+    hostname?: string;
+    pathname?: string;
+    querystring?: string;
+    screenWidth?: number;
+    screenHeight?: number;
+    language?: string;
+    page_title?: string;
+    referrer?: string;
+    user_id?: string;
+    user_agent?: string;
+    ip_address?: string;
+    event_name?: string;
+    properties?: Record<any, any> | string;
+}
+```
+
+<ResponseField name="type" type="'pageview' | 'custom_event'" required>The type of event to track.</ResponseField>
+<ResponseField name="hostname" type="string">Hostname of the page (e.g. `"example.com"`).</ResponseField>
+<ResponseField name="pathname" type="string">URL path of the page.</ResponseField>
+<ResponseField name="querystring" type="string">URL query string.</ResponseField>
+<ResponseField name="screenWidth" type="number">Visitor screen width in pixels.</ResponseField>
+<ResponseField name="screenHeight" type="number">Visitor screen height in pixels.</ResponseField>
+<ResponseField name="language" type="string">Browser language (e.g. `"en-US"`).</ResponseField>
+<ResponseField name="page_title" type="string">Page `<title>` value.</ResponseField>
+<ResponseField name="referrer" type="string">Referring URL.</ResponseField>
+<ResponseField name="user_id" type="string">Your application's user identifier for this visitor.</ResponseField>
+<ResponseField name="user_agent" type="string">User agent string (server-side use).</ResponseField>
+<ResponseField name="ip_address" type="string">Visitor IP address (server-side use).</ResponseField>
+<ResponseField name="event_name" type="string">Name of the custom event (required when `type` is `'custom_event'`).</ResponseField>
+<ResponseField name="properties" type="Record<any, any> | string">Arbitrary key-value properties for the event. Objects are automatically serialized to JSON.</ResponseField>
+
+</Accordion>
+
+<Accordion title="ErrorResponse">
+
+Structure of errors thrown by all SDK methods when a request fails.
+
+```typescript
+interface ErrorResponse {
+    status: number;
+    error: string;
+}
+```
+
+<ResponseField name="status" type="number" required>
+
+Numeric status code:
+
+| Value | Meaning |
+|-------|---------|
+| `-1` | Request failed to send (network error) |
+| `-2` | Failed to parse response (invalid JSON) |
+| `-3` | Unknown response |
+| `XXX` | HTTP status code returned by the server |
+
+</ResponseField>
+
+<ResponseField name="error" type="string" required>
+  Human-readable error message or serialized server response.
+</ResponseField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+## Utilities
+
+### `toDateString`
+
+Converts a `Date` object to a [`DateString`](#datestring).
+
+```typescript
+function toDateString(date: Date): DateString
+```
+
+**Example:**
+
+```typescript
+import { toDateString } from 'rybbit';
+
+const today = toDateString(new Date()); // e.g. "2024-01-31"
+```
+
+---
+
+### `handleRejection`
+
+A utility for catching rejected promises from SDK methods. Guarantees that the error passed to your callback is always a typed [`ErrorResponse`](#errorresponse), regardless of what was actually thrown.
+
+```typescript
+function handleRejection(
+    callback: (error: ErrorResponse) => void | Promise<void>
+): (reason: any) => void
+```
+
+**Example:**
+
+```typescript
+import { Rest, handleRejection } from 'rybbit';
+
+const client = new Rest({ domain: '...', siteId: 123, apiKey: '...' });
+
+client
+    .getUsers()
+    .then((users) => console.log(users))
+    .catch(handleRejection((err) => {
+        console.error(`[${err.status}] ${err.error}`);
+    }));
+```

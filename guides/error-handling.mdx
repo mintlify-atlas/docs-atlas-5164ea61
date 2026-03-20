@@ -1,0 +1,169 @@
+---
+title: Error handling
+description: Handle API errors with ErrorResponse, handleRejection, and async/await try-catch.
+---
+
+All `Rest` methods return promises that reject with an `ErrorResponse` object when something goes wrong. The SDK provides `handleRejection` to make typed error handling straightforward.
+
+## ErrorResponse
+
+Every rejected promise carries an `ErrorResponse`:
+
+```typescript
+import type { ErrorResponse } from 'rybbit.ts';
+
+interface ErrorResponse {
+    status: number;
+    error: string;
+}
+```
+
+### Status codes
+
+| Status | Meaning |
+|--------|---------|
+| `-1` | The request failed to send — network error, DNS failure, or timeout. |
+| `-2` | The response could not be parsed — the server returned non-JSON. |
+| `-3` | Unknown response — the response object was missing or malformed. |
+| `4xx` / `5xx` | HTTP error status from the rybbit server, such as `401 Unauthorized` or `404 Not Found`. |
+
+## handleRejection
+
+`handleRejection` wraps your error callback and guarantees the argument is always a typed `ErrorResponse`, even if the rejection reason is an unexpected value.
+
+```typescript
+import { handleRejection } from 'rybbit.ts';
+
+analytic.track({ type: 'pageview', pathname: '/home' })
+    .catch(handleRejection((error) => {
+        console.error(`[${error.status}] ${error.error}`);
+    }));
+```
+
+Without `handleRejection`, a `.catch()` handler receives `reason: any` and you have to type-narrow it manually. `handleRejection` handles that for you — if the rejection is not a valid `ErrorResponse`, it normalizes it to `{ status: -3, error: 'Unknown response.' }`.
+
+## Patterns
+
+<Tabs>
+  <Tab title=".catch() with handleRejection">
+    Best for fire-and-forget calls where you want to log errors without blocking execution.
+
+    ```typescript
+    import { analytics } from '../lib/analytics.js';
+    import { handleRejection } from 'rybbit.ts';
+
+    analytics
+        .track({
+            type: 'custom_event',
+            event_name: 'button_clicked',
+            ip_address: req.ip,
+            user_agent: req.headers['user-agent']
+        })
+        .catch(
+            handleRejection((error) => {
+                if (error.status === -1) {
+                    console.error('Network error — rybbit unreachable:', error.error);
+                } else if (error.status === 401) {
+                    console.error('Invalid API key.');
+                } else {
+                    console.error(`Tracking failed [${error.status}]:`, error.error);
+                }
+            })
+        );
+    ```
+  </Tab>
+  <Tab title="async/await try-catch">
+    Best when you need to await the result before continuing, or when you want the error to propagate.
+
+    ```typescript
+    import { analytics } from '../lib/analytics.js';
+    import type { ErrorResponse } from 'rybbit.ts';
+
+    try {
+        const result = await analytics.track({
+            type: 'pageview',
+            pathname: '/checkout',
+            ip_address: req.ip,
+            user_agent: req.headers['user-agent']
+        });
+        console.log('Tracked:', result.success);
+    } catch (reason) {
+        const error = reason as ErrorResponse;
+        console.error(`[${error.status}] ${error.error}`);
+    }
+    ```
+
+    <Note>
+      TypeScript types `catch` block variables as `unknown`. Cast to `ErrorResponse` or use a type guard if you need typed access.
+    </Note>
+  </Tab>
+  <Tab title="try-catch with handleRejection">
+    Combine both approaches when you want typed errors inside a `try-catch` block.
+
+    ```typescript
+    import { analytics } from '../lib/analytics.js';
+    import { handleRejection } from 'rybbit.ts';
+
+    async function trackWithErrorHandling() {
+        await analytics
+            .getOverview({
+                startDate: '2024-01-01',
+                endDate: '2024-01-31'
+            })
+            .catch(
+                handleRejection((error) => {
+                    throw new Error(`Analytics unavailable: ${error.error}`);
+                })
+            );
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Checking specific status codes
+
+Match on `error.status` to respond differently to different failure modes:
+
+```typescript
+import { handleRejection } from 'rybbit.ts';
+
+analytics
+    .getOverview({ startDate: '2024-01-01', endDate: '2024-01-31' })
+    .catch(
+        handleRejection((error) => {
+            switch (error.status) {
+                case -1:
+                    // Could not reach the rybbit server
+                    scheduleRetry();
+                    break;
+                case 401:
+                    // API key is invalid or expired
+                    alertOpsTeam('Invalid rybbit API key');
+                    break;
+                case 403:
+                    // API key does not have permission for this site
+                    console.error('Permission denied for site:', analytics.siteId);
+                    break;
+                case 404:
+                    // Site not found
+                    console.error('Site not found:', analytics.siteId);
+                    break;
+                default:
+                    console.error(`Unexpected error [${error.status}]:`, error.error);
+            }
+        })
+    );
+```
+
+## Async error handler
+
+`handleRejection` also accepts an async callback:
+
+```typescript
+analytic.track({ type: 'pageview', pathname: '/home' })
+    .catch(
+        handleRejection(async (error) => {
+            await logErrorToDatabase(error);
+        })
+    );
+```

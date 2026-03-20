@@ -1,0 +1,1063 @@
+---
+title: Routes class
+description: URL builder for all rybbit API endpoints, exported for direct use or advanced integrations.
+---
+
+The `Routes` class constructs typed `URL` objects for every rybbit API endpoint. It is used internally by the [`Rest`](/api-reference/rest-class) class, but is also exported from `rybbit.ts` for cases where you want to build URLs without triggering an HTTP request — for example, when you need to pass a URL to your own fetch wrapper.
+
+## Import
+
+```typescript
+import { Routes } from 'rybbit.ts';
+```
+
+## Constructor
+
+```typescript
+constructor(base: URL)
+```
+
+<ParamField path="base" type="URL" required>
+  The base URL of your rybbit instance. All generated URLs are derived from this origin.
+</ParamField>
+
+```typescript
+const routes = new Routes(new URL('https://app.rybbit.io'));
+
+// Build a URL without making a request
+const url = routes.getOverview(42, { startDate: '2024-01-01' });
+console.log(url.toString());
+// https://app.rybbit.io/api/sites/42/overview?start_date=2024-01-01
+```
+
+<Tip>
+  When using the `Rest` class, a `Routes` instance is available at `client.routes`. You rarely need to construct one yourself.
+</Tip>
+
+## Methods
+
+All methods return a `URL`. Query parameters with `undefined` values are omitted automatically. `filters` arrays are serialized as JSON strings.
+
+---
+
+### Sites
+
+<AccordionGroup>
+
+<Accordion title="getSite">
+
+```typescript
+getSite(siteId: SiteId): URL
+```
+
+`GET /api/sites/{siteId}` — Returns details for a specific site.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="deleteSite">
+
+```typescript
+deleteSite(siteId: SiteId): URL
+```
+
+`DELETE /api/sites/{siteId}` — Permanently deletes a site and all its data. Requires admin/owner role.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="updateSiteConfig">
+
+```typescript
+updateSiteConfig(siteId: SiteId): URL
+```
+
+`PUT /api/sites/{siteId}/config` — Updates site configuration settings. Requires admin/owner role.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getExcludedIPs">
+
+```typescript
+getExcludedIPs(siteId: SiteId): URL
+```
+
+`GET /api/sites/{siteId}/excluded-ips` — Returns the list of excluded IP addresses.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getExcludedCountries">
+
+```typescript
+getExcludedCountries(siteId: SiteId): URL
+```
+
+`GET /api/sites/{siteId}/excluded-counties` — Returns the list of excluded country codes.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getPrivateLinkConfig">
+
+```typescript
+getPrivateLinkConfig(siteId: SiteId): URL
+```
+
+`GET /api/sites/{siteId}/private-link-config` — Returns the private link key configuration.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="updatePrivateLinkConfig">
+
+```typescript
+updatePrivateLinkConfig(siteId: SiteId): URL
+```
+
+`POST /api/sites/{siteId}/private-link-config` — Generates or revokes a private link key. Requires admin/owner role.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Organizations
+
+<AccordionGroup>
+
+<Accordion title="getMyOrganizations">
+
+```typescript
+getMyOrganizations(): URL
+```
+
+`GET /api/organizations` — Returns all organizations the authenticated user is a member of, including all members for each organization.
+
+</Accordion>
+
+<Accordion title="createSite">
+
+```typescript
+createSite(organizationId: string): URL
+```
+
+`POST /api/organizations/{organizationId}/sites` — Creates a new site in an organization. Requires admin/owner role.
+
+<ParamField path="organizationId" type="string" required>
+  The ID of the organization.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getOrganizationMembers">
+
+```typescript
+getOrganizationMembers(organizationId: string): URL
+```
+
+`GET /api/organizations/{organizationId}/members` — Returns all members of an organization with user details.
+
+<ParamField path="organizationId" type="string" required>
+  The ID of the organization.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="addOrganizationMember">
+
+```typescript
+addOrganizationMember(organizationId: string): URL
+```
+
+`POST /api/organizations/{organizationId}/members` — Adds a user to an organization with a specified role.
+
+<ParamField path="organizationId" type="string" required>
+  The ID of the organization.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Overview
+
+<AccordionGroup>
+
+<Accordion title="getOverview">
+
+```typescript
+getOverview(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/overview` — Returns high-level analytics metrics for a site.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+<ParamField path="options.startDate" type="DateString">
+  Start of the date range. Format: `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField path="options.endDate" type="DateString">
+  End of the date range. Format: `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField path="options.timezone" type="TimeZone">
+  IANA timezone string, or `'system'` to use the server default.
+</ParamField>
+
+<ParamField path="options.filters" type="Filter[]">
+  Array of filter objects to narrow the result set.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getOverviewTimeSeries">
+
+```typescript
+getOverviewTimeSeries(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    bucket?: Bucket;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/overview-bucketed` — Returns time-series analytics data broken down by time buckets.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+<ParamField path="options.startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField path="options.endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField path="options.timezone" type="TimeZone">
+  IANA timezone string, or `'system'`.
+</ParamField>
+
+<ParamField path="options.filters" type="Filter[]">
+  Array of filter objects.
+</ParamField>
+
+<ParamField path="options.bucket" type="Bucket">
+  Time bucket granularity. One of: `minute`, `five_minutes`, `ten_minutes`, `fifteen_minutes`, `hour`, `day`, `week`, `month`, `year`.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getMetric">
+
+```typescript
+getMetric(
+  siteId: SiteId,
+  parameter: Parameter,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    limit?: number;
+    page?: number;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/metric` — Returns dimensional analytics broken down by a specific parameter.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+<ParamField path="parameter" type="Parameter" required>
+  The dimension to break down by. One of: `pathname`, `page_title`, `country`, `region`, `city`, `browser`, `operating_system`, `device_type`, `referrer`, `channel`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `language`, `entry_page`, `exit_page`, `event_name`.
+</ParamField>
+
+<ParamField path="options.startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField path="options.endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField path="options.timezone" type="TimeZone">
+  IANA timezone string, or `'system'`.
+</ParamField>
+
+<ParamField path="options.filters" type="Filter[]">
+  Array of filter objects.
+</ParamField>
+
+<ParamField path="options.limit" type="number">
+  Maximum number of rows to return.
+</ParamField>
+
+<ParamField path="options.page" type="number">
+  Page number for pagination.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getLiveVisitors">
+
+```typescript
+getLiveVisitors(siteId: SiteId, minutes?: number): URL
+```
+
+`GET /api/sites/{siteId}/live-user-count` — Returns the count of active sessions within the specified time window.
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site.
+</ParamField>
+
+<ParamField path="minutes" type="number">
+  The lookback window in minutes. Defaults to the server's configured value when omitted.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Events
+
+<AccordionGroup>
+
+<Accordion title="getEvents">
+
+```typescript
+getEvents(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    pageSize?: number;
+    sinceTimestamp?: Timestamp;
+    beforeTimestamp?: Timestamp;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/events` — Returns a paginated list of events with cursor-based pagination.
+
+<ParamField path="options.pageSize" type="number">
+  Number of events per page.
+</ParamField>
+
+<ParamField path="options.sinceTimestamp" type="Timestamp">
+  ISO 8601 timestamp. Only return events after this time.
+</ParamField>
+
+<ParamField path="options.beforeTimestamp" type="Timestamp">
+  ISO 8601 timestamp. Only return events before this time.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getEventNames">
+
+```typescript
+getEventNames(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/events/names` — Returns unique custom event names with occurrence counts.
+
+</Accordion>
+
+<Accordion title="getEventProperties">
+
+```typescript
+getEventProperties(
+  siteId: SiteId,
+  eventName: string,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/events/properties` — Returns property key-value pairs for a specific event.
+
+<ParamField path="eventName" type="string" required>
+  The name of the custom event to inspect.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getOutboundLinks">
+
+```typescript
+getOutboundLinks(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/events/outbound` — Returns outbound link clicks with occurrence counts.
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Errors
+
+<AccordionGroup>
+
+<Accordion title="getErrorNames">
+
+```typescript
+getErrorNames(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    limit?: number;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/error-names` — Returns unique error messages with occurrence and session counts.
+
+<ParamField path="options.page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField path="options.limit" type="number">
+  Maximum number of results per page.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getErrorEvents">
+
+```typescript
+getErrorEvents(
+  siteId: SiteId,
+  errorMessage: string,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    limit?: number;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/error-events` — Returns individual error occurrences with context and stack traces.
+
+<ParamField path="errorMessage" type="string" required>
+  The error message string to filter by.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getErrorTimeSeries">
+
+```typescript
+getErrorTimeSeries(
+  siteId: SiteId,
+  errorMessage: string,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    bucket?: Bucket;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/error-bucketed` — Returns error occurrence counts over time.
+
+<ParamField path="errorMessage" type="string" required>
+  The error message string to filter by.
+</ParamField>
+
+<ParamField path="options.bucket" type="Bucket">
+  Time bucket granularity.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Goals
+
+<AccordionGroup>
+
+<Accordion title="getGoals">
+
+```typescript
+getGoals(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    pageSize?: number;
+    sortBy?: SortBy;
+    order?: Order;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/goals` — Returns a paginated list of goals with conversion metrics.
+
+<ParamField path="options.sortBy" type="SortBy">
+  Field to sort by. One of: `goalId`, `name`, `goalType`, `createdAt`, `first_seen`, `last_seen`, `pageviews`, `sessions`, `events`.
+</ParamField>
+
+<ParamField path="options.order" type="Order">
+  Sort direction: `asc` or `desc`.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getGoalSessions">
+
+```typescript
+getGoalSessions(
+  siteId: SiteId,
+  goalId: number,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    limit?: number;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/goals/{goalId}/sessions` — Returns sessions that completed a specific goal.
+
+<ParamField path="goalId" type="number" required>
+  The numeric ID of the goal.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="createGoal">
+
+```typescript
+createGoal(siteId: SiteId): URL
+```
+
+`POST /api/sites/{siteId}/goals` — Creates a new goal.
+
+</Accordion>
+
+<Accordion title="updateGoal">
+
+```typescript
+updateGoal(siteId: SiteId, goalId: number): URL
+```
+
+`PUT /api/sites/{siteId}/goals/{goalId}` — Updates an existing goal.
+
+<ParamField path="goalId" type="number" required>
+  The numeric ID of the goal to update.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="deleteGoal">
+
+```typescript
+deleteGoal(siteId: SiteId, goalId: number): URL
+```
+
+`DELETE /api/sites/{siteId}/goals/{goalId}` — Deletes a goal.
+
+<ParamField path="goalId" type="number" required>
+  The numeric ID of the goal to delete.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Funnels
+
+<AccordionGroup>
+
+<Accordion title="getFunnels">
+
+```typescript
+getFunnels(siteId: SiteId): URL
+```
+
+`GET /api/sites/{siteId}/funnels` — Returns all saved funnels for a site.
+
+</Accordion>
+
+<Accordion title="analyzeFunnel">
+
+```typescript
+analyzeFunnel(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+  }
+): URL
+```
+
+`POST /api/sites/{siteId}/funnels/analyze` — Analyzes funnel conversion data step-by-step. The funnel definition is sent in the request body.
+
+</Accordion>
+
+<Accordion title="getFunnelStepSessions">
+
+```typescript
+getFunnelStepSessions(
+  siteId: SiteId,
+  stepNumber: number,
+  mode: Mode,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    limit?: number;
+  }
+): URL
+```
+
+`POST /api/sites/{siteId}/funnels/{stepNumber}/sessions` — Returns sessions that reached or dropped at a specific funnel step.
+
+<ParamField path="stepNumber" type="number" required>
+  The 1-based index of the funnel step.
+</ParamField>
+
+<ParamField path="mode" type="Mode" required>
+  Filter sessions by funnel position: `reached` or `dropped`. Also accepts `day` or `week` for time-bucketed views.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="createFunnel">
+
+```typescript
+createFunnel(siteId: SiteId): URL
+```
+
+`POST /api/sites/{siteId}/funnels` — Creates a saved funnel.
+
+</Accordion>
+
+<Accordion title="deleteFunnel">
+
+```typescript
+deleteFunnel(siteId: SiteId, funnelId: number): URL
+```
+
+`DELETE /api/sites/{siteId}/funnels/{funnelId}` — Deletes a saved funnel.
+
+<ParamField path="funnelId" type="number" required>
+  The numeric ID of the funnel to delete.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Performance
+
+<AccordionGroup>
+
+<Accordion title="getPerformanceOverview">
+
+```typescript
+getPerformanceOverview(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/performance/overview` — Returns aggregate Core Web Vitals metrics.
+
+</Accordion>
+
+<Accordion title="getPerformanceTimeSeries">
+
+```typescript
+getPerformanceTimeSeries(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    bucket?: Bucket;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/performance/time-series` — Returns performance metrics over time.
+
+<ParamField path="options.bucket" type="Bucket">
+  Time bucket granularity.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getPerformanceByDimension">
+
+```typescript
+getPerformanceByDimension(
+  siteId: SiteId,
+  dimension: Dimension,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    limit?: number;
+    sortBy?: SortBy;
+    sortOrder?: Order;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/performance/by-dimension` — Returns performance breakdown by dimension.
+
+<ParamField path="dimension" type="Dimension" required>
+  The dimension to break down by. One of: `pathname`, `country`, `browser`, `operating_system`, `device_type`.
+</ParamField>
+
+<ParamField path="options.sortBy" type="SortBy">
+  Field to sort results by.
+</ParamField>
+
+<ParamField path="options.sortOrder" type="Order">
+  Sort direction: `asc` or `desc`.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Sessions
+
+<AccordionGroup>
+
+<Accordion title="getSessions">
+
+```typescript
+getSessions(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    limit?: number;
+    userId?: string;
+    identifiedOnly?: boolean;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/sessions` — Returns a paginated list of sessions.
+
+<ParamField path="options.userId" type="string">
+  Filter sessions to a specific user ID.
+</ParamField>
+
+<ParamField path="options.identifiedOnly" type="boolean">
+  When `true`, only returns sessions for identified (non-anonymous) users.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getSession">
+
+```typescript
+getSession(
+  siteId: SiteId,
+  sessionId: string,
+  options?: {
+    limit?: number;
+    offset?: number;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/sessions/{sessionId}` — Returns detailed session information with events.
+
+<ParamField path="sessionId" type="string" required>
+  The ID of the session to retrieve.
+</ParamField>
+
+<ParamField path="options.limit" type="number">
+  Maximum number of events to return.
+</ParamField>
+
+<ParamField path="options.offset" type="number">
+  Number of events to skip for pagination.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getSessionLocations">
+
+```typescript
+getSessionLocations(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/session-locations` — Returns aggregated session locations for map visualization.
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Users
+
+<AccordionGroup>
+
+<Accordion title="getUsers">
+
+```typescript
+getUsers(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    page?: number;
+    pageSize?: number;
+    sortBy?: SortBy;
+    sortOrder?: Order;
+    identifiedOnly?: boolean;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/users` — Returns a paginated list of users.
+
+<ParamField path="options.identifiedOnly" type="boolean">
+  When `true`, only returns identified users.
+</ParamField>
+
+<ParamField path="options.sortBy" type="SortBy">
+  Field to sort results by.
+</ParamField>
+
+<ParamField path="options.sortOrder" type="Order">
+  Sort direction: `asc` or `desc`.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getUserSessionCount">
+
+```typescript
+getUserSessionCount(
+  siteId: SiteId,
+  userId: string,
+  options?: { timezone?: TimeZone }
+): URL
+```
+
+`GET /api/sites/{siteId}/users/session-count` — Returns daily session counts for a specific user.
+
+<ParamField path="userId" type="string" required>
+  The ID of the user.
+</ParamField>
+
+<ParamField path="options.timezone" type="TimeZone">
+  IANA timezone string for bucketing daily counts.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getUserInfo">
+
+```typescript
+getUserInfo(siteId: SiteId, userId: string): URL
+```
+
+`GET /api/sites/{siteId}/users/{userId}` — Returns detailed user profile information.
+
+<ParamField path="userId" type="string" required>
+  The ID of the user.
+</ParamField>
+
+</Accordion>
+
+</AccordionGroup>
+
+---
+
+### Misc
+
+<AccordionGroup>
+
+<Accordion title="getRetention">
+
+```typescript
+getRetention(
+  siteId: SiteId,
+  options?: {
+    mode?: Mode;
+    range?: number;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/retention` — Returns cohort-based retention analysis.
+
+<ParamField path="options.mode" type="Mode">
+  Retention bucketing mode: `day` or `week`.
+</ParamField>
+
+<ParamField path="options.range" type="number">
+  Number of periods to include in the retention matrix.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="getJourneys">
+
+```typescript
+getJourneys(
+  siteId: SiteId,
+  options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Filter[];
+    steps?: number;
+    limit?: number;
+  }
+): URL
+```
+
+`GET /api/sites/{siteId}/journeys` — Returns the most common page navigation paths.
+
+<ParamField path="options.steps" type="number">
+  Number of path steps to include per journey.
+</ParamField>
+
+<ParamField path="options.limit" type="number">
+  Maximum number of journeys to return.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="track">
+
+```typescript
+track(): URL
+```
+
+`POST /api/track` — Returns the tracking ingestion endpoint URL. The event payload is sent in the request body.
+
+</Accordion>
+
+</AccordionGroup>

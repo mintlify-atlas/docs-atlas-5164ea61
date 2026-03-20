@@ -1,0 +1,224 @@
+---
+title: Organizations
+description: Manage organizations, members, and create new sites within your Rybbit account.
+---
+
+## `getMyOrganizations`
+
+Returns all organizations the authenticated user is a member of, including the full member list for each organization.
+
+```typescript
+async getMyOrganizations(): Promise<any>
+```
+
+### Example
+
+```typescript
+import { Rest } from 'rybbit';
+
+const client = new Rest({
+    domain: 'https://app.rybbit.io',
+    siteId: 42,
+    apiKey: 'YOUR_API_KEY'
+});
+
+const orgs = await client.getMyOrganizations();
+console.log(orgs);
+```
+
+<Tip>
+  Use this method to discover your `organizationId` values before calling organization-scoped methods like `createSite` or `getOrganizationMembers`.
+</Tip>
+
+---
+
+## `createSite`
+
+Creates a new site within a specified organization.
+
+<Note>
+  Requires **admin** or **owner** role on the organization.
+</Note>
+
+```typescript
+async createSite(
+    organizationId: string,
+    details: CreateSiteRequestBody
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="organizationId" type="string" required>
+  The ID of the organization to create the site under.
+</ParamField>
+
+<ParamField body="details" type="CreateSiteRequestBody" required>
+  Configuration for the new site.
+
+  <Expandable title="CreateSiteRequestBody">
+    <ParamField body="domain" type="string" required>
+      The domain to track (e.g. `"example.com"`).
+    </ParamField>
+
+    <ParamField body="name" type="string" required>
+      A human-readable display name for the site.
+    </ParamField>
+
+    <ParamField body="public" type="boolean">
+      Whether the dashboard should be publicly accessible without login. Defaults to `false`.
+    </ParamField>
+
+    <ParamField body="blockBots" type="boolean">
+      Whether to filter bot and crawler traffic. Defaults to `false`.
+    </ParamField>
+
+    <ParamField body="saltUserIds" type="boolean">
+      Whether to salt user IDs for additional anonymisation. Defaults to `false`.
+    </ParamField>
+
+    <ParamField body="excludedIPs" type="string[]">
+      IP addresses to exclude from tracking.
+    </ParamField>
+
+    <ParamField body="excludedCountries" type="string[]">
+      ISO 3166-1 alpha-2 country codes to exclude from tracking.
+    </ParamField>
+
+    <ParamField body="sessionReplay" type="boolean">
+      Whether to enable session replay recording.
+    </ParamField>
+
+    <ParamField body="webVitals" type="boolean">
+      Whether to collect Core Web Vitals metrics.
+    </ParamField>
+
+    <ParamField body="trackErrors" type="boolean">
+      Whether to capture JavaScript errors.
+    </ParamField>
+
+    <ParamField body="trackOutbound" type="boolean">
+      Whether to track outbound link clicks.
+    </ParamField>
+
+    <ParamField body="trackUrlParams" type="boolean">
+      Whether to include URL query parameters in page path tracking.
+    </ParamField>
+
+    <ParamField body="trackInitialPageView" type="boolean">
+      Whether to track the initial page view when the script loads.
+    </ParamField>
+
+    <ParamField body="trackSpaNavigation" type="boolean">
+      Whether to track client-side navigations in single-page applications.
+    </ParamField>
+
+    <ParamField body="trackIp" type="boolean">
+      Whether to record visitor IP addresses.
+    </ParamField>
+
+    <ParamField body="trackButtonClicks" type="boolean">
+      Whether to automatically track button click events.
+    </ParamField>
+
+    <ParamField body="trackCopy" type="boolean">
+      Whether to track text copy events.
+    </ParamField>
+
+    <ParamField body="trackFormInteractions" type="boolean">
+      Whether to track form field interactions.
+    </ParamField>
+
+    <ParamField body="tags" type="string[]">
+      Optional tags to associate with the site for organisation purposes.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Example
+
+```typescript
+const site = await client.createSite('org_abc123', {
+    domain: 'example.com',
+    name: 'Example Site',
+    public: false,
+    blockBots: true,
+    trackErrors: true,
+    trackOutbound: true
+});
+
+console.log(site);
+```
+
+---
+
+## `getOrganizationMembers`
+
+Returns all members of a specified organization with their user details and roles.
+
+```typescript
+async getOrganizationMembers(organizationId: string): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="organizationId" type="string" required>
+  The ID of the organization whose members to retrieve.
+</ParamField>
+
+### Example
+
+```typescript
+const members = await client.getOrganizationMembers('org_abc123');
+console.log(members);
+```
+
+---
+
+## `addOrganizationMember`
+
+Adds a user to an organization with a specified role.
+
+```typescript
+async addOrganizationMember(
+    organizationId: string,
+    member: AddOrganizationMemberRequestBody
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="organizationId" type="string" required>
+  The ID of the organization to add the member to.
+</ParamField>
+
+<ParamField body="member" type="AddOrganizationMemberRequestBody" required>
+  The member details.
+
+  <Expandable title="AddOrganizationMemberRequestBody">
+    <ParamField body="email" type="string" required>
+      The email address of the user to add. The user must already have a Rybbit account.
+    </ParamField>
+
+    <ParamField body="role" type="'admin' | 'member' | 'owner'" required>
+      The role to assign to the new member.
+
+      - `owner` — full control, including billing and deletion.
+      - `admin` — can manage sites and members.
+      - `member` — read-only access to analytics dashboards.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Example
+
+```typescript
+await client.addOrganizationMember('org_abc123', {
+    email: 'colleague@example.com',
+    role: 'admin'
+});
+```
+
+<Tip>
+  You can retrieve the current list of members first with `getOrganizationMembers` to avoid adding duplicates.
+</Tip>

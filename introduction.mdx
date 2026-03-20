@@ -1,0 +1,89 @@
+---
+title: Introduction
+description: rybbit.ts is a TypeScript SDK for the rybbit.com analytics API, built for server-side runtimes like Node.js.
+---
+
+# rybbit.ts
+
+A TypeScript wrapper for the [rybbit.com](https://rybbit.com) analytics API. Built for server-side runtimes such as Node.js, Bun, and Deno — so you can track events, query analytics data, and manage your sites directly from your backend.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install rybbit.ts using npm, bun, or deno
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get up and running with your first tracking call in minutes
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/rest-class">
+    Explore the full Rest class and all available methods
+  </Card>
+  <Card title="Guides" icon="book" href="/guides/configuration">
+    Learn how to configure, track events, handle errors, and filter data
+  </Card>
+</CardGroup>
+
+## What is rybbit.ts?
+
+rybbit.ts is an npm package that wraps the rybbit.com REST API with full TypeScript support. It gives you a clean, typed interface to:
+
+- **Track events server-side** — pageviews and custom events with custom properties
+- **Query analytics** — overview metrics, time-series data, metric breakdowns by parameter
+- **Manage sites and organizations** — create sites, manage members, update configuration
+- **Analyze user behavior** — sessions, user profiles, journeys, retention cohorts
+- **Monitor errors** — error names, occurrences, and time-series error counts
+- **Define and track goals** — path and event-based conversion goals
+- **Build funnels** — multi-step conversion funnel analysis
+- **Measure performance** — Core Web Vitals overview, time-series, and dimension breakdowns
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Full TypeScript support" icon="shield-check">
+    Every method, parameter, and response is fully typed. No guessing.
+  </Card>
+  <Card title="Server-side tracking" icon="server">
+    Track events from Node.js, Bun, or Deno with IP address and user agent support.
+  </Card>
+  <Card title="Comprehensive analytics API" icon="chart-line">
+    Access all rybbit.com analytics endpoints: overview, metrics, sessions, users, and more.
+  </Card>
+  <Card title="Built-in error handling" icon="triangle-exclamation">
+    Typed `ErrorResponse` and a `handleRejection` utility for clean async error flows.
+  </Card>
+  <Card title="Flexible filtering" icon="filter">
+    Filter analytics by country, browser, path, UTM parameters, and more.
+  </Card>
+  <Card title="Utility helpers" icon="wrench">
+    `toDateString` and `handleRejection` for common date formatting and error handling tasks.
+  </Card>
+</CardGroup>
+
+## Quick example
+
+```typescript
+import rybbit from 'rybbit.ts';
+
+const analytics = new rybbit({
+    domain: 'https://example.rybbit.com',
+    siteId: 1,
+    apiKey: process.env.RYBBIT_API_KEY
+});
+
+// Track a custom event server-side
+const result = await analytics.track({
+    type: 'custom_event',
+    ip_address: '8.8.8.8',
+    event_name: 'user_signup',
+    properties: { plan: 'pro' }
+});
+
+// Result: { success: true }
+```
+
+## Package information
+
+- **Package name:** `rybbit.ts`
+- **License:** MIT
+- **Runtime support:** Node.js, Bun, Deno
+- **Module format:** ESM (`"type": "module"`)
+- **Repository:** [jacobhumston/rybbit.ts](https://github.com/jacobhumston/rybbit.ts)

@@ -1,0 +1,233 @@
+---
+title: Events
+description: Retrieve raw events, custom event names, event properties, and outbound link clicks.
+---
+
+## `getEvents`
+
+Returns a paginated list of events using cursor-based pagination. Use `sinceTimestamp` and `beforeTimestamp` to page through results.
+
+```typescript
+async getEvents(options: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    pageSize?: number;
+    sinceTimestamp?: Timestamp;
+    beforeTimestamp?: Timestamp;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone used to interpret the date range.
+</ParamField>
+
+<ParamField query="filters" type="Filter[]">
+  Array of filter objects to narrow the results. See [Overview](/api-reference/overview#filter) for the `Filter` type.
+</ParamField>
+
+<ParamField query="pageSize" type="number">
+  Number of events to return per page.
+</ParamField>
+
+<ParamField query="sinceTimestamp" type="string">
+  ISO 8601 cursor timestamp. Returns events that occurred **after** this timestamp, used for forward pagination.
+</ParamField>
+
+<ParamField query="beforeTimestamp" type="string">
+  ISO 8601 cursor timestamp. Returns events that occurred **before** this timestamp, used for backward pagination.
+</ParamField>
+
+### Example
+
+```typescript
+import { Rest } from 'rybbit';
+
+const client = new Rest({
+    domain: 'https://app.rybbit.io',
+    siteId: 42,
+    apiKey: 'YOUR_API_KEY'
+});
+
+// Fetch the first page
+const firstPage = await client.getEvents({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    pageSize: 50
+});
+
+console.log(firstPage);
+
+// Fetch the next page using the last event's timestamp as a cursor
+const nextPage = await client.getEvents({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    pageSize: 50,
+    beforeTimestamp: '2024-01-15T12:30:00.000Z'
+});
+```
+
+<Tip>
+  Cursor-based pagination is more reliable than offset-based pagination for live datasets. Use `sinceTimestamp` to poll for new events since your last fetch, or `beforeTimestamp` to load older events.
+</Tip>
+
+---
+
+## `getEventNames`
+
+Returns a list of unique custom event names with occurrence counts for the specified date range.
+
+```typescript
+async getEventNames(options: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone used to interpret the date range.
+</ParamField>
+
+<ParamField query="filters" type="Filter[]">
+  Array of filter objects to narrow the results.
+</ParamField>
+
+### Example
+
+```typescript
+const names = await client.getEventNames({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31'
+});
+
+console.log(names);
+// e.g. [{ event_name: 'signup', count: 142 }, { event_name: 'upgrade', count: 37 }]
+```
+
+<Tip>
+  Use `getEventNames` to discover which custom events are being fired before drilling into their properties with `getEventProperties`.
+</Tip>
+
+---
+
+## `getEventProperties`
+
+Returns property key-value pairs and their occurrence counts for a specific custom event.
+
+```typescript
+async getEventProperties(
+    eventName: string,
+    options: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="eventName" type="string" required>
+  The name of the custom event to retrieve properties for. Must match a name returned by `getEventNames`.
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone used to interpret the date range.
+</ParamField>
+
+<ParamField query="filters" type="Filter[]">
+  Array of filter objects to narrow the results.
+</ParamField>
+
+### Example
+
+```typescript
+const properties = await client.getEventProperties('signup', {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31'
+});
+
+console.log(properties);
+// e.g. [{ key: 'plan', value: 'pro', count: 98 }, ...]
+```
+
+---
+
+## `getOutboundLinks`
+
+Returns a list of outbound link clicks with their occurrence counts for the specified date range.
+
+```typescript
+async getOutboundLinks(options: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (inclusive), formatted as `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone used to interpret the date range.
+</ParamField>
+
+<ParamField query="filters" type="Filter[]">
+  Array of filter objects to narrow the results.
+</ParamField>
+
+### Example
+
+```typescript
+const outbound = await client.getOutboundLinks({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31'
+});
+
+console.log(outbound);
+// e.g. [{ url: 'https://github.com/org/repo', count: 312 }, ...]
+```
+
+<Note>
+  Outbound link tracking must be enabled on the site (`trackOutbound: true`) for this endpoint to return data. Enable it via `updateSiteConfig` or when creating the site with `createSite`.
+</Note>

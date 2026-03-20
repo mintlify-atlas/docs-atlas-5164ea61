@@ -1,0 +1,134 @@
+---
+title: Configuration
+description: Configure the Rest client with your rybbit instance domain, site ID, and API key.
+---
+
+The `Rest` class is the main entry point for the SDK. Before you can track events or query analytics, you need to configure it with your rybbit instance details.
+
+## RestConfig
+
+The constructor accepts a single `RestConfig` object:
+
+```typescript
+import Rest from 'rybbit.ts';
+
+const analytics = new Rest({
+    domain: 'https://your-rybbit-instance.com',
+    siteId: 12345,
+    apiKey: process.env.RYBBIT_API_KEY
+});
+```
+
+### Parameters
+
+<ParamField path="domain" type="string" required>
+  The full URL of your rybbit instance. This is the root domain where your rybbit server is hosted — for example, `https://rybbit.example.com`. The SDK constructs all API endpoint URLs from this base.
+</ParamField>
+
+<ParamField path="siteId" type="number" required>
+  The numeric ID of the site you want to track or query. You can find this in your rybbit dashboard. Each site has a unique integer identifier.
+</ParamField>
+
+<ParamField path="apiKey" type="string" required>
+  Your rybbit API key. This is sent as a `Bearer` token on every request. Keep this value secret — never hardcode it in source code.
+</ParamField>
+
+## Using environment variables
+
+Store your API key in an environment variable to keep it out of your codebase.
+
+<Steps>
+  <Step title="Add the variable to your .env file">
+    ```bash .env
+    RYBBIT_API_KEY=your_api_key_here
+    RYBBIT_DOMAIN=https://your-rybbit-instance.com
+    RYBBIT_SITE_ID=12345
+    ```
+  </Step>
+
+  <Step title="Load the .env file">
+    <Tabs>
+      <Tab title="Node.js (v20.6+)">
+        ```bash
+        node --env-file=.env your-script.js
+        ```
+      </Tab>
+      <Tab title="dotenv">
+        ```typescript
+        import 'dotenv/config';
+        ```
+        Install dotenv first: `npm install dotenv`
+      </Tab>
+      <Tab title="Bun">
+        Bun loads `.env` automatically — no extra setup needed.
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Create the Rest instance">
+    ```typescript
+    import Rest from 'rybbit.ts';
+
+    const analytics = new Rest({
+        domain: process.env.RYBBIT_DOMAIN,
+        siteId: Number(process.env.RYBBIT_SITE_ID),
+        apiKey: process.env.RYBBIT_API_KEY
+    });
+    ```
+
+    <Note>
+      `process.env` values are always strings. Use `Number()` to convert `RYBBIT_SITE_ID` to the numeric type that `siteId` requires.
+    </Note>
+  </Step>
+</Steps>
+
+## ESM import
+
+rybbit.ts is an ESM-only package. Use `import`, not `require`.
+
+<Tabs>
+  <Tab title="Default import">
+    ```typescript
+    import Rest from 'rybbit.ts';
+
+    const analytics = new Rest({ ... });
+    ```
+  </Tab>
+  <Tab title="Named import">
+    ```typescript
+    import { Rest } from 'rybbit.ts';
+
+    const analytics = new Rest({ ... });
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  `require('rybbit.ts')` will not work. Make sure your project has `"type": "module"` in its `package.json`, or use a `.mjs` file extension.
+</Warning>
+
+## Reusing the instance
+
+Create a single `Rest` instance and export it for use across your application.
+
+```typescript
+// lib/analytics.ts
+import Rest from 'rybbit.ts';
+
+export const analytics = new Rest({
+    domain: process.env.RYBBIT_DOMAIN,
+    siteId: Number(process.env.RYBBIT_SITE_ID),
+    apiKey: process.env.RYBBIT_API_KEY
+});
+```
+
+```typescript
+// routes/signup.ts
+import { analytics } from '../lib/analytics.js';
+
+analytic.track({ type: 'custom_event', event_name: 'signup' });
+```
+
+<Tip>
+  Sharing one instance avoids re-creating the route URLs on every call and keeps your configuration in one place.
+</Tip>

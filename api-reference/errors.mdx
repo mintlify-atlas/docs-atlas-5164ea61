@@ -1,0 +1,171 @@
+---
+title: Errors
+description: Methods for tracking and querying JavaScript errors captured on your site.
+---
+
+## `getErrorNames`
+
+Returns unique error messages with occurrence and session counts.
+
+```typescript
+async getErrorNames(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    page?: number;
+    limit?: number;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (e.g. `"2024-01-31"`).
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range (e.g. `"2024-03-31"`).
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. Defaults to `'system'`. See [TimeZone](/api-reference/types#timezone) for all valid values.
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of results per page.
+</ParamField>
+
+### Example
+
+```typescript
+const errors = await client.getErrorNames({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    limit: 20,
+    page: 1,
+});
+```
+
+---
+
+## `getErrorEvents`
+
+Returns individual error occurrences with context and stack traces for a specific error message.
+
+```typescript
+async getErrorEvents(
+    errorMessage: string,
+    options?: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+        page?: number;
+        limit?: number;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="errorMessage" type="string" required>
+  The error message string to look up occurrences for.
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of results per page.
+</ParamField>
+
+### Example
+
+```typescript
+const events = await client.getErrorEvents('TypeError: Cannot read properties of null', {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    limit: 50,
+});
+```
+
+---
+
+## `getErrorTimeSeries`
+
+Returns error occurrence counts over time, bucketed by a time interval.
+
+```typescript
+async getErrorTimeSeries(
+    errorMessage: string,
+    options?: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+        bucket?: Bucket;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="errorMessage" type="string" required>
+  The error message to retrieve time-series data for.
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="bucket" type="Bucket">
+  Time bucket size for grouping data points. See [Bucket](/api-reference/types#bucket).
+</ParamField>
+
+### Example
+
+```typescript
+const timeSeries = await client.getErrorTimeSeries('TypeError: Cannot read properties of null', {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    bucket: 'day',
+});
+```

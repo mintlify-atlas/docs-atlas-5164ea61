@@ -1,0 +1,128 @@
+---
+title: Users
+description: Methods for listing users, retrieving user profiles, and querying session activity.
+---
+
+## `getUsers`
+
+Returns a paginated list of users with activity metrics.
+
+```typescript
+async getUsers(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    page?: number;
+    pageSize?: number;
+    sortBy?: SortBy;
+    sortOrder?: Order;
+    identifiedOnly?: boolean;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (e.g. `"2024-01-31"`).
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="pageSize" type="number">
+  Number of results per page.
+</ParamField>
+
+<ParamField query="sortBy" type="SortBy">
+  Field to sort results by. One of: `'first_seen'`, `'last_seen'`, `'pageviews'`, `'sessions'`.
+</ParamField>
+
+<ParamField query="sortOrder" type="Order">
+  Sort direction. One of: `'asc'`, `'desc'`.
+</ParamField>
+
+<ParamField query="identifiedOnly" type="boolean">
+  When `true`, returns only users with an assigned user ID.
+</ParamField>
+
+### Example
+
+```typescript
+const users = await client.getUsers({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    identifiedOnly: true,
+    sortBy: 'last_seen',
+    sortOrder: 'desc',
+    pageSize: 20,
+});
+```
+
+---
+
+## `getUserSessionCount`
+
+Returns daily session counts for a specific user.
+
+```typescript
+async getUserSessionCount(
+    userId: string,
+    options?: {
+        timezone?: TimeZone;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="userId" type="string" required>
+  The user ID to retrieve session counts for.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+### Example
+
+```typescript
+const counts = await client.getUserSessionCount('user_abc', {
+    timezone: 'America/New_York',
+});
+```
+
+---
+
+## `getUserInfo`
+
+Returns detailed profile information for a specific user.
+
+```typescript
+async getUserInfo(userId: string): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="userId" type="string" required>
+  The user ID to retrieve profile information for.
+</ParamField>
+
+### Example
+
+```typescript
+const user = await client.getUserInfo('user_abc');
+```

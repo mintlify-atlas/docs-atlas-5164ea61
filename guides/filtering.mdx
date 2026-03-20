@@ -1,0 +1,205 @@
+---
+title: Filtering
+description: Narrow analytics queries by country, path, browser, UTM parameters, and more using Filter objects.
+---
+
+Most analytics methods accept a `filters` option that lets you scope results to a subset of your traffic. Filters are typed `Filter` objects that you compose and pass as an array.
+
+## The Filter type
+
+```typescript
+import type { Filter } from 'rybbit.ts';
+
+interface Filter {
+    parameter: FilterParameter;
+    type: FilterType;
+    value: Array<string>;
+}
+```
+
+<ParamField path="parameter" type="FilterParameter" required>
+  The dimension to filter on, such as `'country'`, `'browser'`, or `'pathname'`. See the full list below.
+</ParamField>
+
+<ParamField path="type" type="FilterType" required>
+  How to compare the `value` against the data. Options: `'equals'`, `'not_equals'`, `'contains'`, `'not_contains'`, `'regex'`.
+</ParamField>
+
+<ParamField path="value" type="Array<string>" required>
+  One or more values to match against. Multiple values act as an OR — the filter matches if any value applies.
+</ParamField>
+
+## FilterParameter values
+
+| Parameter | Description |
+|-----------|-------------|
+| `country` | ISO 3166-1 alpha-2 country code of the visitor, e.g. `'US'`, `'DE'`. |
+| `region` | Region or state, e.g. `'California'`. |
+| `city` | City name, e.g. `'Berlin'`. |
+| `browser` | Browser name, e.g. `'Chrome'`, `'Firefox'`, `'Safari'`. |
+| `operating_system` | Operating system, e.g. `'Windows'`, `'macOS'`, `'Android'`. |
+| `device_type` | Device category: `'desktop'`, `'mobile'`, `'tablet'`. |
+| `pathname` | URL path of the page, e.g. `'/pricing'`. |
+| `referrer` | Referring URL or domain, e.g. `'https://twitter.com'`. |
+| `utm_source` | UTM source parameter, e.g. `'newsletter'`. |
+| `utm_medium` | UTM medium parameter, e.g. `'email'`. |
+| `utm_campaign` | UTM campaign parameter, e.g. `'spring_sale'`. |
+| `channel` | Traffic channel, e.g. `'organic'`, `'direct'`, `'paid'`. |
+| `entry_page` | First page visited in the session. |
+| `exit_page` | Last page visited before the session ended. |
+| `language` | Visitor's preferred language, e.g. `'en-US'`. |
+
+## FilterType values
+
+| Type | Behavior |
+|------|----------|
+| `equals` | Exact match against any of the provided values. |
+| `not_equals` | Excludes records matching any of the provided values. |
+| `contains` | Matches when the field contains any of the provided strings as a substring. |
+| `not_contains` | Excludes records where the field contains any of the provided strings. |
+| `regex` | Matches the field against a regular expression string. |
+
+## Basic examples
+
+```typescript
+import type { Filter } from 'rybbit.ts';
+
+// Only US traffic
+const usOnly: Filter = {
+    parameter: 'country',
+    type: 'equals',
+    value: ['US']
+};
+
+// Exclude bot-heavy referrers
+const noSpam: Filter = {
+    parameter: 'referrer',
+    type: 'not_contains',
+    value: ['semalt.com', 'buttons-for-website.com']
+};
+
+// Only blog pages
+const blogOnly: Filter = {
+    parameter: 'pathname',
+    type: 'contains',
+    value: ['/blog']
+};
+```
+
+## Passing filters to methods
+
+Pass `filters` as an array inside the options object. All methods that accept analytics query options support the `filters` field.
+
+<Tabs>
+  <Tab title="getOverview">
+    ```typescript
+    const data = await analytics.getOverview({
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+        filters: [
+            {
+                parameter: 'country',
+                type: 'equals',
+                value: ['US', 'CA']
+            }
+        ]
+    });
+    ```
+  </Tab>
+  <Tab title="getMetric">
+    ```typescript
+    const pages = await analytics.getMetric('pathname', {
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+        filters: [
+            {
+                parameter: 'device_type',
+                type: 'equals',
+                value: ['mobile']
+            }
+        ]
+    });
+    ```
+  </Tab>
+  <Tab title="getEvents">
+    ```typescript
+    const events = await analytics.getEvents({
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+        filters: [
+            {
+                parameter: 'utm_campaign',
+                type: 'equals',
+                value: ['spring_sale']
+            }
+        ]
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Multiple filters
+
+Pass more than one filter to narrow results across multiple dimensions. All filters are applied together — a session must match every filter to be included.
+
+```typescript
+const filters: Filter[] = [
+    {
+        // Only US or UK visitors
+        parameter: 'country',
+        type: 'equals',
+        value: ['US', 'GB']
+    },
+    {
+        // Coming from paid search
+        parameter: 'channel',
+        type: 'equals',
+        value: ['paid']
+    },
+    {
+        // On a product page
+        parameter: 'pathname',
+        type: 'contains',
+        value: ['/products']
+    }
+];
+
+const overview = await analytics.getOverview({
+    startDate: '2024-01-01',
+    endDate: '2024-03-31',
+    filters
+});
+```
+
+## Regex filtering
+
+Use `'regex'` for pattern-based matching:
+
+```typescript
+const docsPages: Filter = {
+    parameter: 'pathname',
+    type: 'regex',
+    value: ['^/docs/.*']
+};
+
+const metric = await analytics.getMetric('pathname', {
+    filters: [docsPages]
+});
+```
+
+<Warning>
+  Regex patterns are matched server-side. Complex patterns may not be supported. Use `contains` for simple substring matching unless you specifically need regex.
+</Warning>
+
+## Multiple values on a single filter
+
+Providing multiple strings in `value` creates an OR condition within that filter:
+
+```typescript
+// Sessions from Chrome OR Firefox
+const modernBrowsers: Filter = {
+    parameter: 'browser',
+    type: 'equals',
+    value: ['Chrome', 'Firefox', 'Safari']
+};
+```

@@ -1,80 +1,200 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Initialize rybbit.ts and make your first tracking call in a few lines of code.
 ---
 
-## Get started in three steps
+This guide walks you from a fresh install to a working analytics integration.
 
-Get your documentation site running locally and make your first customization.
+<Steps>
 
-### Step 1: Set up your local environment
+<Step title="Import and instantiate the client">
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Import the default export and create a client instance using `RestConfig`. You need your rybbit domain, site ID, and API key.
 
-### Step 2: Deploy your changes
+```typescript
+import rybbit from 'rybbit.ts';
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+const analytics = new rybbit({
+    domain: 'https://example.rybbit.com',
+    siteId: 1,
+    apiKey: process.env.RYBBIT_API_KEY
+});
+```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<Tip>
+  Store your API key in an environment variable and never commit it to source
+  control. Use a `.env` file or your hosting provider's secrets manager.
+</Tip>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+The `RestConfig` interface accepts:
 
-### Step 3: Go live
+| Field     | Type     | Description                             |
+| --------- | -------- | --------------------------------------- |
+| `domain`  | `string` | The base URL of your rybbit instance    |
+| `siteId`  | `number` | The numeric ID of the site to track     |
+| `apiKey`  | `string` | Your rybbit API key                     |
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+</Step>
+
+<Step title="Track a custom event">
+
+Use `analytics.track()` to send a `custom_event` from your server. Pass an `ip_address` so rybbit can attribute the event to the correct location.
+
+```typescript
+const result = await analytics.track({
+    type: 'custom_event',
+    ip_address: '8.8.8.8',
+    event_name: 'user_signup',
+    properties: { plan: 'pro', referral: 'homepage' }
+});
+
+// result: { success: true }
+```
+
+The `properties` field accepts any `Record<string, any>` — pass whatever metadata is meaningful for the event.
+
+</Step>
+
+<Step title="Track a pageview">
+
+To record a server-rendered pageview, set `type` to `'pageview'` and include the path and hostname:
+
+```typescript
+const result = await analytics.track({
+    type: 'pageview',
+    hostname: 'example.com',
+    pathname: '/pricing',
+    ip_address: request.headers.get('x-forwarded-for') ?? '127.0.0.1',
+    user_agent: request.headers.get('user-agent') ?? undefined,
+    referrer: request.headers.get('referer') ?? undefined
+});
+
+// result: { success: true }
+```
+
+<Note>
+  Forward the real `ip_address` and `user_agent` from the incoming request so
+  rybbit can correctly resolve the visitor's location, browser, and device.
+</Note>
+
+</Step>
+
+<Step title="Handle errors">
+
+All methods return a rejected promise on failure with an `ErrorResponse` object. Use the `handleRejection` utility to get typed errors in your `.catch()` handler:
+
+```typescript
+import rybbit, { handleRejection } from 'rybbit.ts';
+
+const result = await analytics
+    .track({
+        type: 'custom_event',
+        event_name: 'checkout_complete'
+    })
+    .catch(
+        handleRejection((error) => {
+            // error is typed as ErrorResponse
+            console.error(`[${error.status}] ${error.error}`);
+        })
+    );
+```
+
+The `ErrorResponse` status codes:
+
+| Status | Meaning                               |
+| ------ | ------------------------------------- |
+| `-1`   | Request failed to send                |
+| `-2`   | Response was not valid JSON           |
+| `-3`   | Unknown response                      |
+| `XXX`  | HTTP status code returned by server   |
+
+Without `handleRejection`, the raw rejection reason may not be a typed `ErrorResponse`. The utility normalizes it so your callback always receives the correct shape.
+
+</Step>
+
+<Step title="Query analytics data">
+
+Once events are flowing, you can read analytics back using the query methods. Here is an example using `getOverview` to fetch high-level metrics for a date range:
+
+```typescript
+import { toDateString } from 'rybbit.ts';
+
+const today = toDateString(new Date());
+
+const overview = await analytics
+    .getOverview({
+        startDate: '2024-01-01',
+        endDate: today,
+        timezone: 'UTC'
+    })
+    .catch(
+        handleRejection((error) => {
+            console.error(`Failed to fetch overview: ${error.error}`);
+        })
+    );
+
+console.log(overview);
+```
+
+The `toDateString` helper converts a JavaScript `Date` to the `YYYY-MM-DD` format (`DateString`) required by all date parameters.
+
+</Step>
+
+</Steps>
+
+## Full example
+
+Here is everything together in a single file:
+
+```typescript
+import rybbit, { handleRejection, toDateString } from 'rybbit.ts';
+
+const analytics = new rybbit({
+    domain: 'https://example.rybbit.com',
+    siteId: 1,
+    apiKey: process.env.RYBBIT_API_KEY
+});
+
+// Track a custom event
+await analytics
+    .track({
+        type: 'custom_event',
+        ip_address: '8.8.8.8',
+        event_name: 'user_signup',
+        properties: { plan: 'pro' }
+    })
+    .catch(handleRejection((error) => console.error(error)));
+
+// Track a pageview
+await analytics
+    .track({
+        type: 'pageview',
+        hostname: 'example.com',
+        pathname: '/home'
+    })
+    .catch(handleRejection((error) => console.error(error)));
+
+// Query overview metrics
+const overview = await analytics
+    .getOverview({ startDate: '2024-01-01', endDate: toDateString(new Date()) })
+    .catch(handleRejection((error) => console.error(error)));
+
+console.log(overview);
+```
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Configuration" icon="gear" href="/guides/configuration">
+    Learn all `RestConfig` options and how to structure your client.
+  </Card>
+  <Card title="Tracking events" icon="bolt" href="/guides/tracking-events">
+    Explore the full `TrackRequestBody` shape and event types.
+  </Card>
+  <Card title="Error handling" icon="triangle-exclamation" href="/guides/error-handling">
+    Deep-dive into `handleRejection` and error status codes.
+  </Card>
+  <Card title="API reference" icon="code" href="/api-reference/rest-class">
+    Browse every method available on the `Rest` class.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

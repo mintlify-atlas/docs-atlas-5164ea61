@@ -1,0 +1,239 @@
+---
+title: Goals
+description: Methods for managing conversion goals and retrieving goal session data.
+---
+
+## `getGoals`
+
+Returns a paginated list of goals with conversion metrics.
+
+```typescript
+async getGoals(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    page?: number;
+    pageSize?: number;
+    sortBy?: SortBy;
+    order?: Order;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (e.g. `"2024-01-31"`).
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="pageSize" type="number">
+  Number of results per page.
+</ParamField>
+
+<ParamField query="sortBy" type="SortBy">
+  Field to sort results by. One of: `'goalId'`, `'name'`, `'goalType'`, `'createdAt'`, `'first_seen'`, `'last_seen'`, `'pageviews'`, `'sessions'`, `'events'`.
+</ParamField>
+
+<ParamField query="order" type="Order">
+  Sort direction. One of: `'asc'`, `'desc'`.
+</ParamField>
+
+### Example
+
+```typescript
+const goals = await client.getGoals({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    sortBy: 'sessions',
+    order: 'desc',
+    pageSize: 10,
+});
+```
+
+---
+
+## `getGoalSessions`
+
+Returns sessions that completed a specific goal.
+
+```typescript
+async getGoalSessions(
+    goalId: number,
+    options?: {
+        startDate?: DateString;
+        endDate?: DateString;
+        timezone?: TimeZone;
+        filters?: Array<Filter>;
+        page?: number;
+        limit?: number;
+    }
+): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="goalId" type="number" required>
+  Numeric ID of the goal to retrieve sessions for.
+</ParamField>
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range.
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="page" type="number">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Number of results per page.
+</ParamField>
+
+### Example
+
+```typescript
+const sessions = await client.getGoalSessions(42, {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    limit: 25,
+});
+```
+
+---
+
+## `createGoal`
+
+Creates a new conversion goal.
+
+```typescript
+async createGoal(goal: CreateGoalRequestBody): Promise<any>
+```
+
+### Parameters
+
+<ParamField body="name" type="string" required>
+  Display name for the goal.
+</ParamField>
+
+<ParamField body="goalType" type="'path' | 'event'" required>
+  Whether the goal tracks a page path match or a custom event.
+</ParamField>
+
+<ParamField body="config" type="object" required>
+  Goal configuration object.
+
+  <Expandable title="config fields">
+    <ParamField body="config.pathPattern" type="string">
+      URL path pattern to match (used when `goalType` is `'path'`).
+    </ParamField>
+
+    <ParamField body="config.eventName" type="string">
+      Custom event name to match (used when `goalType` is `'event'`).
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Example
+
+```typescript
+// Path-based goal
+const goal = await client.createGoal({
+    name: 'Signup complete',
+    goalType: 'path',
+    config: { pathPattern: '/signup/complete' },
+});
+
+// Event-based goal
+const goal = await client.createGoal({
+    name: 'Purchase',
+    goalType: 'event',
+    config: { eventName: 'purchase' },
+});
+```
+
+---
+
+## `updateGoal`
+
+Updates an existing goal. Accepts the same fields as `createGoal`.
+
+```typescript
+async updateGoal(goalId: number, goal: UpdateGoalRequestBody): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="goalId" type="number" required>
+  Numeric ID of the goal to update.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  Updated display name for the goal.
+</ParamField>
+
+<ParamField body="goalType" type="'path' | 'event'" required>
+  Updated goal type.
+</ParamField>
+
+<ParamField body="config" type="object" required>
+  Updated goal configuration. Same shape as `createGoal`.
+</ParamField>
+
+### Example
+
+```typescript
+await client.updateGoal(42, {
+    name: 'Signup complete (updated)',
+    goalType: 'path',
+    config: { pathPattern: '/welcome' },
+});
+```
+
+---
+
+## `deleteGoal`
+
+Permanently deletes a goal.
+
+```typescript
+async deleteGoal(goalId: number): Promise<any>
+```
+
+### Parameters
+
+<ParamField path="goalId" type="number" required>
+  Numeric ID of the goal to delete.
+</ParamField>
+
+### Example
+
+```typescript
+await client.deleteGoal(42);
+```

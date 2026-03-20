@@ -1,0 +1,88 @@
+---
+title: Misc
+description: Miscellaneous analytics methods including retention cohorts and user journey paths.
+---
+
+## `getRetention`
+
+Returns cohort-based retention analysis showing how often users return over time.
+
+```typescript
+async getRetention(options?: {
+    mode?: Mode;
+    range?: number;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="mode" type="Mode">
+  Time grouping mode for cohorts. One of: `'day'`, `'week'`, `'reached'`, `'dropped'`.
+</ParamField>
+
+<ParamField query="range" type="number">
+  Number of periods to include in the retention matrix.
+</ParamField>
+
+### Example
+
+```typescript
+const retention = await client.getRetention({
+    mode: 'week',
+    range: 8,
+});
+```
+
+---
+
+## `getJourneys`
+
+Returns the most common multi-page navigation paths users take through your site.
+
+```typescript
+async getJourneys(options?: {
+    startDate?: DateString;
+    endDate?: DateString;
+    timezone?: TimeZone;
+    filters?: Array<Filter>;
+    steps?: number;
+    limit?: number;
+}): Promise<any>
+```
+
+### Parameters
+
+<ParamField query="startDate" type="DateString">
+  Start of the date range (e.g. `"2024-01-31"`).
+</ParamField>
+
+<ParamField query="endDate" type="DateString">
+  End of the date range.
+</ParamField>
+
+<ParamField query="timezone" type="TimeZone">
+  Timezone for interpreting dates. See [TimeZone](/api-reference/types#timezone).
+</ParamField>
+
+<ParamField query="filters" type="Array<Filter>">
+  Filters to narrow results. See [Filter](/api-reference/types#filter).
+</ParamField>
+
+<ParamField query="steps" type="number">
+  Number of steps to include in each path sequence.
+</ParamField>
+
+<ParamField query="limit" type="number">
+  Maximum number of paths to return.
+</ParamField>
+
+### Example
+
+```typescript
+const journeys = await client.getJourneys({
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    steps: 4,
+    limit: 10,
+});
+```
