@@ -1,0 +1,125 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "rybbit.ts",
+  "projectDescription": "A TypeScript SDK for the rybbit.com analytics API, designed for server-side runtimes like Node.js.",
+  "theme": "sequoia",
+  "primaryColor": "#90bf85",
+  "lightColor": "#3d5037",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "installation", "quickstart"]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/configuration",
+              "guides/tracking-events",
+              "guides/error-handling",
+              "guides/filtering"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Core",
+            "pages": [
+              "api-reference/rest-class",
+              "api-reference/routes-class",
+              "api-reference/request-function"
+            ]
+          },
+          {
+            "group": "Methods",
+            "pages": [
+              "api-reference/sites",
+              "api-reference/organizations",
+              "api-reference/overview",
+              "api-reference/events",
+              "api-reference/errors",
+              "api-reference/goals",
+              "api-reference/funnels",
+              "api-reference/performance",
+              "api-reference/sessions",
+              "api-reference/users",
+              "api-reference/misc"
+            ]
+          },
+          {
+            "group": "Types",
+            "pages": ["api-reference/types"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Full TypeScript support with typed request and response bodies",
+    "Wraps the rybbit.com REST API for server-side use",
+    "Track pageviews and custom events from server runtimes",
+    "Analytics methods: overview, metrics, sessions, users, goals, funnels",
+    "Built-in error handling with typed ErrorResponse",
+    "Utility helpers: toDateString, handleRejection",
+    "Supports filtering, pagination, time zones, and date ranges",
+    "Core Web Vitals and performance analytics access"
+  ],
+  "publicApiSurface": [
+    "Rest (default export class)",
+    "Rest#getSite()",
+    "Rest#deleteSite()",
+    "Rest#updateSiteConfig(config)",
+    "Rest#getExcludedIPs()",
+    "Rest#getExcludedCountries()",
+    "Rest#getPrivateLinkConfig()",
+    "Rest#updatePrivateLinkConfig(action)",
+    "Rest#getMyOrganizations()",
+    "Rest#createSite(organizationId, details)",
+    "Rest#getOrganizationMembers(organizationId)",
+    "Rest#addOrganizationMember(organizationId, member)",
+    "Rest#getOverview(options)",
+    "Rest#getOverviewTimeSeries(options)",
+    "Rest#getMetric(parameter, options)",
+    "Rest#getLiveVisitors(minutes?)",
+    "Rest#getEvents(options)",
+    "Rest#getEventNames(options)",
+    "Rest#getEventProperties(eventName, options)",
+    "Rest#getOutboundLinks(options)",
+    "Rest#getErrorNames(options)",
+    "Rest#getErrorEvents(errorMessage, options)",
+    "Rest#getErrorTimeSeries(errorMessage, options)",
+    "Rest#getGoals(options)",
+    "Rest#getGoalSessions(goalId, options)",
+    "Rest#createGoal(goal)",
+    "Rest#updateGoal(goalId, goal)",
+    "Rest#deleteGoal(goalId)",
+    "Rest#getFunnels()",
+    "Rest#analyzeFunnel(funnel, options)",
+    "Rest#getFunnelStepSessions(funnel, stepNumber, mode, options)",
+    "Rest#createFunnel(funnel)",
+    "Rest#deleteFunnel(funnelId)",
+    "Rest#getPerformanceOverview(options)",
+    "Rest#getPerformanceTimeSeries(options)",
+    "Rest#getPerformanceByDimension(dimension, options)",
+    "Rest#getSessions(options)",
+    "Rest#getSession(sessionId, options)",
+    "Rest#getSessionLocations(options)",
+    "Rest#getUsers(options)",
+    "Rest#getUserSessionCount(userId, options)",
+    "Rest#getUserInfo(userId)",
+    "Rest#getRetention(options)",
+    "Rest#getJourneys(options)",
+    "Rest#track(payload)",
+    "Routes (class)",
+    "request (function)",
+    "toDateString (function)",
+    "handleRejection (function)"
+  ]
+}
